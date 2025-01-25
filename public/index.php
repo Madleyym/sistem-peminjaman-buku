@@ -407,7 +407,7 @@ try {
                     </div>
                 </div>
                 <div class="hidden md:block">
-                    <img src="/api/placeholder/500/400" alt="Library Illustration" class="rounded-2xl shadow-lg transform hover:scale-105 transition duration-300">
+                    <img src="assets/images/Library Illustration1.png" alt="Library Illustration" class="rounded-2xl shadow-lg transform hover:scale-105 transition duration-300">
                 </div>
             </div>
         </section>
@@ -418,24 +418,39 @@ try {
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                 <?php if (!empty($newBooks)): ?>
                     <?php foreach ($newBooks as $book): ?>
-                        <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-2 transition duration-300 p-4 text-center">
-                            <img
-                                src="<?= !empty($book['cover_image']) ? htmlspecialchars($book['cover_image']) : '../assets/images/default-book-cover.jpg' ?>"
-                                alt="<?= htmlspecialchars($book['title']) ?>"
-                                class="w-full h-64 object-cover rounded-xl mb-4">
-                            <h3 class="font-semibold text-lg text-gray-800 mb-2">
-                                <?= htmlspecialchars($book['title']) ?>
-                            </h3>
-                            <p class="text-gray-600 mb-4">
-                                <?= htmlspecialchars($book['author']) ?>
-                            </p>
-                            <a href="book-detail.php?id=<?= $book['id'] ?>" class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition">
+                        <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-2 transition duration-300 p-4 flex flex-col">
+                            <div class="relative mb-4">
+                                <img
+                                    src="<?= !empty($book['cover_image']) ? htmlspecialchars($book['cover_image']) : '../assets/images/default-book-cover.jpg' ?>"
+                                    alt="<?= htmlspecialchars($book['title']) ?>"
+                                    class="w-full h-64 object-cover rounded-xl">
+                                <span class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                                    Baru
+                                </span>
+                            </div>
+
+                            <div class="flex-grow flex flex-col">
+                                <h3 class="font-semibold text-lg text-gray-800 mb-1 line-clamp-2 h-12">
+                                    <?= htmlspecialchars($book['title']) ?>
+                                </h3>
+                                <p class="text-gray-600 text-sm mb-1">
+                                    <?= htmlspecialchars($book['author']) ?>
+                                </p>
+                                <div class="text-gray-500 text-xs mb-2 flex justify-between">
+                                    <span>Tahun: <?= htmlspecialchars($book['year_published']) ?></span>
+                                </div>
+                            </div>
+
+                            <a
+                                href="#"
+                                onclick="checkLoginStatus(<?= $book['id'] ?>); return false;"
+                                class="w-full py-2.5 rounded-full text-sm font-semibold text-center bg-blue-500 text-white hover:bg-blue-600 transition duration-300 ease-in-out mt-3">
                                 Detail
                             </a>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <div class="col-span-full text-center text-gray-600">
+                    <div class="col-span-full text-center text-gray-600 py-8">
                         Belum ada buku terbaru.
                     </div>
                 <?php endif; ?>
@@ -475,5 +490,17 @@ try {
         </div>
     </footer>
 </body>
+<script>
+    function checkLoginStatus(bookId) {
+        <?php if (empty($_SESSION['user_id'])): ?>
+            // Show login/register modal or redirect
+            $('#loginModal').modal('show');
+            $('#loginModal').find('#redirect-book-id').val(bookId);
+        <?php else: ?>
+            // Redirect to book detail page
+            window.location.href = 'books-detail.php?id=' + bookId;
+        <?php endif; ?>
+    }
+</script>
 
 </html>
