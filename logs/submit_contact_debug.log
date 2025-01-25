@@ -1,0 +1,84 @@
+[2025-01-25 05:58:48] Script dimulai
+[2025-01-25 05:58:48] POST Data: Array
+(
+    [csrf_token] => 979b2895d68b8dd574b28aab5ebe8cd07b5de83fbc28b30d27170a084141640f
+    [name] => Tryanda Anggita Suwito
+    [email] => 2203010343@unper.ac.id
+    [message] => asasasa
+)
+
+[2025-01-25 05:58:48] Validation Errors: Array
+(
+    [0] => Pesan terlalu pendek
+)
+
+[2025-01-25 05:59:13] Script dimulai
+[2025-01-25 05:59:13] POST Data: Array
+(
+    [csrf_token] => 979b2895d68b8dd574b28aab5ebe8cd07b5de83fbc28b30d27170a084141640f
+    [name] => Tryanda Anggita Suwito
+    [email] => 2203010343@unper.ac.id
+    [message] => aku ajsdjaiohdhuciasdbfcuisddf
+)
+
+[2025-01-25 05:59:13] Validation Errors: Array
+(
+)
+
+[2025-01-25 05:59:13] Koneksi database berhasil
+[2025-01-25 05:59:13] Database Insert Result: Success
+[2025-01-25 05:59:13] PDO Error Info: Array
+(
+    [0] => 00000
+    [1] => 
+    [2] => 
+)
+
+[2025-01-25 05:59:13] Pesan berhasil dikirim
+[2025-01-25 06:10:25] Script dimulai
+[2025-01-25 06:10:25] POST Data: Array
+(
+    [csrf_token] => 979b2895d68b8dd574b28aab5ebe8cd07b5de83fbc28b30d27170a084141640f
+    [name] => Tryanda Anggita Suwito
+    [email] => 2203010343@unper.ac.id
+    [message] => asa
+)
+
+[2025-01-25 06:10:25] Validation Errors: Array
+(
+    [0] => Pesan minimal 10 karakter
+)
+
+[2025-01-25 06:10:49] Script dimulai
+[2025-01-25 06:10:49] POST Data: Array
+(
+    [csrf_token] => 979b2895d68b8dd574b28aab5ebe8cd07b5de83fbc28b30d27170a084141640f
+    [name] => Tryanda Anggita Suwitoa
+    [email] => 2203010343@unper.ac.id
+    [message] => adadadadadadaadaa
+)
+
+[2025-01-25 06:10:49] Koneksi database berhasil
+[2025-01-25 06:10:49] Database Insert Result: Success
+[2025-01-25 06:10:49] PDO Error Info: Array
+(
+    [0] => 00000
+    [1] => 
+    [2] => 
+)
+
+[2025-01-25 06:10:49] Pesan berhasil dikirim
+[2025-01-25 06:14:02] Script dimulai
+[2025-01-25 06:14:02] POST Data: Array
+(
+    [csrf_token] => 979b2895d68b8dd574b28aab5ebe8cd07b5de83fbc28b30d27170a084141640f
+    [name] => Tryanda Anggita Suwito
+    [email] => 2203010343@unper.ac.idasa
+    [message] => aasaa
+)
+
+[2025-01-25 06:14:02] Validation Errors: Array
+(
+    [0] => Pesan minimal 10 karakter
+)
+
