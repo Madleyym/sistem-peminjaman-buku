@@ -1,0 +1,107 @@
+/* responsive.css index.php */
+/* Mobile Styles (default) */
+.container {
+    max-width: 100%;
+    padding: 0 15px;
+}
+
+.hero {
+    padding: 30px 15px;
+}
+
+.hero h1 {
+    font-size: 2rem;
+}
+
+.hero p {
+    font-size: 1rem;
+}
+
+.quick-actions {
+    flex-direction: column;
+    align-items: center;
+}
+
+.btn {
+    width: 100%;
+    max-width: 250px;
+    margin-bottom: 15px;
+}
+
+.book-card-container {
+    flex-direction: column;
+    align-items: center;
+}
+
+.book-card {
+    width: 100%;
+    max-width: 300px;
+}
+
+/* Tablet Styles */
+@media screen and (min-width: 768px) {
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .quick-actions {
+        flex-direction: row;
+        gap: 20px;
+    }
+
+    .btn {
+        width: auto;
+        max-width: none;
+        margin-bottom: 0;
+    }
+
+    .book-card-container {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .book-card {
+        width: calc(50% - 20px);
+    }
+}
+
+/* Desktop Styles */
+@media screen and (min-width: 1024px) {
+    .container {
+        max-width: 1200px;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .book-card-container {
+        justify-content: space-between;
+    }
+
+    .book-card {
+        width: calc(33.333% - 20px);
+    }
+}
+
+/* High Resolution Screens */
+@media screen and (min-width: 1440px) {
+    .container {
+        max-width: 1400px;
+    }
+
+    .book-card {
+        width: calc(25% - 20px);
+    }
+}
+
+/* responsive.css index.php */
+
+/* Responsive Adjustments register.php*/
+@media screen and (max-width: 600px) {
+    .register-form {
+        width: 95%;
+        padding: 20px;
+    }
+}
+/* Responsive Adjustments register.php*/
