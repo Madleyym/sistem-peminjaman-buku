@@ -136,7 +136,6 @@ class User
             'message' => 'Email, NIK, atau password salah'
         ];
     }
-    
 /*************  ✨ adminLoginWithNIK ⭐  *************/   
 
     public function register($name, $email, $password, $phone = '', $address = '')
