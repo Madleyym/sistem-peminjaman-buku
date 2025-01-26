@@ -4,101 +4,63 @@
 
 <head></head>
 <style>
-    body {
+    footer {
         display: flex;
+        /* Mengatur footer menggunakan flexbox */
         flex-direction: column;
-        min-height: 100vh;
-        margin: 0;
-    }
-
-    .page-wrapper {
-        flex: 1 0 auto;
-    }
-
-    .main-footer {
-        flex-shrink: 0;
-        background-color: var(--primary-color);
-        color: var(--white);
-        padding: 20px 0;
-        width: 100%;
-    }
-
-    .footer-content {
-        display: flex;
-        justify-content: space-between;
+        /* Susunan vertikal */
+        justify-content: center;
+        /* Konten di tengah secara vertikal */
         align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
+        /* Konten di tengah secara horizontal */
+        text-align: center;
+        /* Memusatkan teks */
     }
 
-    .footer-links {
-        display: flex;
-        align-items: center;
+    footer .container {
+        display: grid;
+        /* Gunakan grid untuk tata letak kolom */
+        grid-template-columns: 1fr;
+        /* Semua kolom menumpuk di layar kecil */
+        gap: 20px;
+        /* Jarak antar item */
     }
 
-    .footer-links a {
-        color: var(--white);
-        text-decoration: none;
-        margin-left: 15px;
-        transition: opacity 0.3s ease;
-        white-space: nowrap;
-    }
-
-    .footer-links a:hover {
-        opacity: 0.8;
-    }
-
-    /* Responsive Adjustments */
-    @media screen and (max-width: 768px) {
-        .footer-content {
-            flex-direction: column;
-            text-align: center;
-            gap: 15px;
-        }
-
-        .footer-links {
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .footer-links a {
-            margin: 0 10px 10px;
-            display: inline-block;
-        }
-    }
-
-    @media screen and (max-width: 480px) {
-        .footer-content {
-            padding: 0 10px;
-        }
-
-        .footer-links {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .footer-links a {
-            margin: 5px 0;
+    @media (min-width: 768px) {
+        footer .container {
+            grid-template-columns: repeat(3, 1fr);
+            /* 3 kolom di layar besar */
         }
     }
 </style>
-</div> <!-- Penutup page-wrapper dari header -->
-<footer class="main-footer">
-    <div class="container">
+
+<footer class="bg-gray-800 text-white py-12">
+    <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
         <div>
-            <div class="footer-content">
-                <p>&copy; <?= date('Y') ?> <?= SITE_NAME ?>. All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="/public/privacy.php">Kebijakan Privasi</a>
-                    <a href="/public/terms.php">Syarat & Ketentuan</a>
-                </div>
+            <h4 class="text-xl font-bold mb-4"><?= htmlspecialchars(SITE_NAME) ?></h4>
+            <p class="text-gray-400">Platform peminjaman buku digital modern dan efisien</p>
+            <div class="flex space-x-4 mt-4">
+                <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
+        <div>
+            <h4 class="text-xl font-bold mb-4">Tautan Cepat</h4>
+            <ul class="space-y-2">
+                <li><a href="/" class="text-gray-300 hover:text-white">Beranda</a></li>
+                <li><a href="/books" class="text-gray-300 hover:text-white">Buku</a></li>
+                <li><a href="/contact" class="text-gray-300 hover:text-white">Kontak</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="text-xl font-bold mb-4">Hubungi Kami</h4>
+            <p class="text-gray-400 mb-2">Email: support@perpustakaan.com</p>
+            <p class="text-gray-400 mb-2">Telepon: +62 888 1234 5678</p>
+            <p class="text-gray-400">Alamat: Jl. Perpustakaan No. 123, Kota</p>
+        </div>
+    </div>
+    <div class="text-center text-gray-500 mt-8 pt-4 border-t border-gray-700">
+        &copy; <?= date('Y') ?> <?= htmlspecialchars(SITE_NAME) ?>. Hak Cipta Dilindungi.
     </div>
 </footer>
-<script src="/assets/js/main.js"></script>
-</body>
-
-</html>
