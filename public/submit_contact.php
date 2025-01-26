@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 session_start();
 require_once '../config/database.php';
 require_once '../config/constants.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $log_file = 'C:\xampp\htdocs\sistem\logs\submit_contact_debug.log';
 
