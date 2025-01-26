@@ -1,9 +1,12 @@
 <?php
 require_once '../config/constants.php';
 require_once '../includes/header.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -73,18 +76,20 @@ require_once '../includes/header.php';
                 flex-direction: column;
             }
 
-            .about-content, .about-image {
+            .about-content,
+            .about-image {
                 width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
     <main class="about-container">
         <div class="about-content">
             <h1>Tentang <?= SITE_NAME ?></h1>
             <p>Kami adalah platform peminjaman buku modern yang bertujuan memudahkan akses literasi untuk semua kalangan. Dengan teknologi canggih, kami membangun ekosistem perpustakaan digital yang efisien dan user-friendly.</p>
-            
+
             <div class="mission-section">
                 <h2>Misi Kami</h2>
                 <p>Memberdayakan masyarakat melalui akses mudah dan cepat terhadap pengetahuan, menghubungkan pembaca dengan buku-buku berkualitas, serta mendorong budaya literasi yang inklusif.</p>
@@ -96,4 +101,5 @@ require_once '../includes/header.php';
     </main>
     <?php include '../includes/footer.php'; ?>
 </body>
+
 </html>
