@@ -2,6 +2,7 @@
 session_start();
 require_once '../config/constants.php';
 require_once '../config/database.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // Regenerate CSRF token if not exists
 if (!isset($_SESSION['csrf_token'])) {
@@ -52,16 +53,13 @@ if (isset($_SESSION['errors'])) {
     }
 </style>
 
-
-
 <body class="bg-gray-50 font-inter min-h-screen flex flex-col">
-
-    <!-- Mobile Navigation (Copied from index.php) -->
+    <!-- Mobile Navigation -->
     <nav x-data="{ open: false }" class="bg-blue-700 md:hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/" class="text-white font-bold text-xl">
+                    <a href="/sistem/public/index.php" class="text-white font-bold text-xl">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                 </div>
@@ -86,13 +84,13 @@ if (isset($_SESSION['errors'])) {
         <div x-show="open" class="md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-blue-600">
                 <a href="/" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
-                <a href="books.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
+                <a href="/sistem/public/auth/users/book-loan.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
                 <?php if (empty($_SESSION['user_id'])): ?>
                     <a href="../../auth/login.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
                     <a href="../../auth/register.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Daftar</a>
                 <?php else: ?>
-                    <a href="/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Dashboard</a>
-                    <a href="/auth/logout.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Logout</a>
+                    <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                    <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
                 <?php endif; ?>
                 <a href="/contact" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
             </div>
@@ -104,7 +102,7 @@ if (isset($_SESSION['errors'])) {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/" class="text-white font-bold text-xl mr-8">
+                    <a href="/sistem/public/index.php" class="text-white font-bold text-xl mr-8">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                     <div class="flex space-x-4">
@@ -118,8 +116,8 @@ if (isset($_SESSION['errors'])) {
                         <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
                         <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
                     <?php else: ?>
-                        <a href="/sistem/public/dashboard.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
-                        <a href="/sistem/public/auth/logout.php" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium">Logout</a>
+                        <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
                     <?php endif; ?>
                 </div>
             </div>
