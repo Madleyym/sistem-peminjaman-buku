@@ -148,8 +148,9 @@ class Book
         $stmt->execute();
         return $stmt->rowCount() > 0;
     }
-    /*************  ✨ new methods ⭐  *************/
+    /*************  ✨ new update ⭐  *************/
 
+    /*************  ✨ new methods ⭐  *************/
 
     public function countLowStockBooks($threshold = 3)
     {
@@ -174,16 +175,28 @@ class Book
     {
         $this->conn = $db;
     }
+
     public function getBorrowedBooksByUserId($user_id)
     {
-        $query = "SELECT b.* FROM books b 
-                  JOIN borrowings br ON b.id = br.book_id 
-                  WHERE br.user_id = :user_id";
+        $query = "SELECT l.*, b.* FROM loans l
+              JOIN books b ON l.book_id = b.id
+              WHERE l.user_id = :user_id AND l.status = 'active'
+              ORDER BY l.loan_date DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    // public function getBorrowedBooksByUserId($user_id)
+    // {
+    //     $query = "SELECT b.* FROM books b 
+    //               JOIN borrowings br ON b.id = br.book_id 
+    //               WHERE br.user_id = :user_id";
+    //     $stmt = $this->conn->prepare($query);
+    //     $stmt->bindParam(':user_id', $user_id);
+    //     $stmt->execute();
+    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // }
     public function create($data)
     {
         $query = "INSERT INTO {$this->table_name} 
