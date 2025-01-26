@@ -136,8 +136,38 @@ class User
             'message' => 'Email, NIK, atau password salah'
         ];
     }
-/*************  ✨ adminLoginWithNIK ⭐  *************/   
+    /*************  ✨ adminLoginWithNIK ⭐  *************/
 
+    public function updateProfile($userId, $name, $email, $phone, $address, $profileImage)
+    {
+        $query = "UPDATE users SET 
+                name = :name, 
+                email = :email, 
+                phone_number = :phone, 
+                address = :address, 
+                profile_image = :profile_image 
+              WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':phone', $phone);
+        $stmt->bindParam(':address', $address);
+        $stmt->bindParam(':profile_image', $profileImage);
+        $stmt->bindParam(':id', $userId);
+
+        return $stmt->execute();
+    }
+
+    public function getUserById($userId)
+    {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $userId);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
     public function register($name, $email, $password, $phone = '', $address = '')
     {
         if ($this->emailExists($email)) {
