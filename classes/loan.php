@@ -1,15 +1,16 @@
 <?php
-// classes/loan.php
-class Loan {
+class Loan
+{
     private $conn;
     private $table_name = 'loans';
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
-    public function createLoan($user_id, $book_id, $loan_days = 14) {
-        // Begin transaction
+    public function createLoan($user_id, $book_id, $loan_days = 14)
+    {
         $this->conn->beginTransaction();
 
         try {
@@ -25,10 +26,10 @@ class Loan {
 
             // Create loan record
             $loan_query = "INSERT INTO " . $this->table_name . " 
-                           (user_id, book_id, loan_date, due_date) 
+                           (user_id, book_id, loan_date, due_date, status) 
                            VALUES (:user_id, :book_id, CURRENT_DATE, 
-                                   DATE_ADD(CURRENT_DATE, INTERVAL :loan_days DAY))";
-            
+                                   DATE_ADD(CURRENT_DATE, INTERVAL :loan_days DAY), 'active')";
+
             $loan_stmt = $this->conn->prepare($loan_query);
             $loan_stmt->bindParam(':user_id', $user_id);
             $loan_stmt->bindParam(':book_id', $book_id);
@@ -44,7 +45,6 @@ class Loan {
             // Commit transaction
             $this->conn->commit();
             return ['status' => true, 'message' => 'Peminjaman berhasil'];
-
         } catch (Exception $e) {
             // Rollback transaction
             $this->conn->rollBack();
@@ -52,8 +52,8 @@ class Loan {
         }
     }
 
-    public function returnBook($loan_id) {
-        // Begin transaction
+    public function returnBook($loan_id)
+    {
         $this->conn->beginTransaction();
 
         try {
@@ -73,7 +73,7 @@ class Loan {
                              SET return_date = CURRENT_DATE, 
                                  status = 'returned' 
                              WHERE id = :loan_id";
-            
+
             $return_stmt = $this->conn->prepare($return_query);
             $return_stmt->bindParam(':loan_id', $loan_id);
             $return_stmt->execute();
@@ -87,7 +87,6 @@ class Loan {
             // Commit transaction
             $this->conn->commit();
             return ['status' => true, 'message' => 'Pengembalian berhasil'];
-
         } catch (Exception $e) {
             // Rollback transaction
             $this->conn->rollBack();
@@ -95,17 +94,97 @@ class Loan {
         }
     }
 
-    public function getUserLoans($user_id) {
+    public function getUserLoans($user_id)
+    {
         $query = "SELECT l.*, b.title, b.author 
                   FROM " . $this->table_name . " l
                   JOIN books b ON l.book_id = b.id
                   WHERE l.user_id = :user_id
                   ORDER BY l.loan_date DESC";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function createLoans($loanData)
+    {
+        $query = "INSERT INTO " . $this->table_name . " 
+                  (user_id, book_id, loan_date, due_date, status) 
+                  VALUES (:user_id, :book_id, :loan_date, :due_date, :status)";
+
+        try {
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(':user_id', $loanData['user_id']);
+            $stmt->bindParam(':book_id', $loanData['book_id']);
+            $stmt->bindParam(':loan_date', $loanData['loan_date']);
+            $stmt->bindParam(':due_date', $loanData['due_date']);
+            $stmt->bindParam(':status', $loanData['status']);
+
+            if ($stmt->execute()) {
+                return $this->conn->lastInsertId();
+            }
+            return false;
+        } catch (PDOException $e) {
+            error_log("Loan Creation Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getLoansByUser($user_id)
+    {
+        $query = "SELECT l.*, b.title, b.author 
+                  FROM " . $this->table_name . " l
+                  JOIN books b ON l.book_id = b.id
+                  WHERE l.user_id = :user_id
+                  ORDER BY l.loan_date DESC";
+
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':user_id', $user_id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get Loans Error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function returnBooks($loan_id)
+    {
+        $query = "UPDATE " . $this->table_name . " 
+                  SET status = 'returned', 
+                      return_date = CURRENT_DATE 
+                  WHERE id = :loan_id";
+
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':loan_id', $loan_id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Book Return Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function checkOverdueLoans()
+    {
+        $query = "SELECT l.*, u.email, b.title 
+                  FROM " . $this->table_name . " l
+                  JOIN users u ON l.user_id = u.id
+                  JOIN books b ON l.book_id = b.id
+                  WHERE l.status = 'active' AND l.due_date < CURRENT_DATE";
+
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Overdue Loans Check Error: " . $e->getMessage());
+            return [];
+        }
     }
 }
