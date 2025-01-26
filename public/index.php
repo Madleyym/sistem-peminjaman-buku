@@ -1,6 +1,7 @@
 <?php
 session_start(); // Start session at the beginning
-
+// In a central configuration or bootstrap file
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once '../config/constants.php';
 require_once '../config/database.php';
 require_once '../classes/Book.php';
@@ -313,7 +314,7 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/" class="text-white font-bold text-xl">
+                    <a href="/sistem/public/index.php" class="text-white font-bold text-xl">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                 </div>
@@ -335,10 +336,11 @@ try {
         </div>
 
         <!-- Mobile Menu -->
+
         <div x-show="open" class="md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-blue-600">
                 <a href="/" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
-                <a href="books.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
+                <a href="/sistem/public/auth/users/book-loan.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
                 <?php if (empty($_SESSION['user_id'])): ?>
                     <a href="../../auth/login.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
                     <a href="../../auth/register.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Daftar</a>
@@ -356,7 +358,7 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/" class="text-white font-bold text-xl mr-8">
+                    <a href="/sistem/public/index.php" class="text-white font-bold text-xl mr-8">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                     <div class="flex space-x-4">
@@ -370,8 +372,8 @@ try {
                         <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
                         <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
                     <?php else: ?>
-                        <a href="/sistem/public/dashboard.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
-                        <a href="/sistem/public/auth/logout.php" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium">Logout</a>
+                        <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -393,7 +395,7 @@ try {
                     </p>
                     <div class="flex space-x-4">
                         <?php if (empty($_SESSION['user_id'])): ?>
-                            <a href="/sistem/public/index.php" class="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition">
+                            <a href="/sistem/public/auth/login.php" class="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition">
                                 Login
                             </a>
                             <a href="/sistem/public/auth/register.php" class="bg-green-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-600 transition">
@@ -459,36 +461,9 @@ try {
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-12">
-        <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
-            <div>
-                <h4 class="text-xl font-bold mb-4"><?= htmlspecialchars(SITE_NAME) ?></h4>
-                <p class="text-gray-400">Platform peminjaman buku digital modern dan efisien</p>
-                <div class="flex space-x-4 mt-4">
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-            <div>
-                <h4 class="text-xl font-bold mb-4">Tautan Cepat</h4>
-                <ul class="space-y-2">
-                    <li><a href="/" class="text-gray-300 hover:text-white">Beranda</a></li>
-                    <li><a href="/books" class="text-gray-300 hover:text-white">Buku</a></li>
-                    <li><a href="/contact" class="text-gray-300 hover:text-white">Kontak</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-xl font-bold mb-4">Hubungi Kami</h4>
-                <p class="text-gray-400 mb-2">Email: support@perpustakaan.com</p>
-                <p class="text-gray-400 mb-2">Telepon: +62 888 1234 5678</p>
-                <p class="text-gray-400">Alamat: Jl. Perpustakaan No. 123, Kota</p>
-            </div>
-        </div>
-        <div class="text-center text-gray-500 mt-8 pt-4 border-t border-gray-700">
-            &copy; <?= date('Y') ?> <?= htmlspecialchars(SITE_NAME) ?>. Hak Cipta Dilindungi.
-        </div>
-    </footer>
+    <?php include '../includes/footer.php'; ?>
+
+
 </body>
 <script>
     function checkLoginStatus(bookId) {
