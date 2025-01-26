@@ -3,12 +3,17 @@ session_start();
 require_once '../../config/constants.php';
 require_once '../../config/database.php';
 require_once '../../classes/User.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 // Redirect to dashboard if already logged in
+
+
 if (isset($_SESSION['user_id'])) {
-    header("Location: /sistem/public/auth/login.php");
+    // Jika pengguna sudah login, arahkan ke halaman login
+    header('Location: /sistem/public/auth/login.php');
     exit();
 }
+
 
 // Inisialisasi variabel
 $name = '';
