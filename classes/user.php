@@ -221,4 +221,56 @@ class User
 
         return $stmt->fetchColumn() > 0;
     }
+    // Get all users (including admins if needed)
+    public function getAllUsers()
+    {
+        // Ensure both queries have the same number of columns
+        $query = "
+             SELECT id, name, email, 'user' as role FROM " . $this->table_name . " 
+             UNION 
+             SELECT id, name, email, 'admin' as role FROM admin 
+             ORDER BY name
+         ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Update user (either admin or regular user)
+    public function updateUser($id, $name, $email, $role)
+    {
+        $table = ($role == 'admin') ? 'admin' : $this->table_name;
+        $query = "UPDATE " . $table . " SET name = :name, email = :email WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':id', $id);
+
+        return $stmt->execute();
+    }
+
+    // Delete user (either admin or regular user)
+    public function deleteUser($id, $role)
+    {
+        $table = ($role == 'admin') ? 'admin' : $this->table_name;
+        $query = "DELETE FROM " . $table . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+
+        return $stmt->execute();
+    }
+    // Di class User
+    public function getAllBorrowers()
+    {
+        try {
+            $query = "SELECT * FROM users WHERE role = 'borrower' ORDER BY name ASC";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get All Borrowers Error: " . $e->getMessage());
+            return [];
+        }
+    }
 }
