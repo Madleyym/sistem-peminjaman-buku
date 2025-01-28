@@ -151,96 +151,128 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </nav>
 
     <!-- Main Content -->
+    <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
-        <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-center text-white">
-                <h2 class="text-3xl font-bold">Edit Profil</h2>
-                <p class="text-blue-100 mt-2">Perbarui informasi pribadi Anda</p>
-            </div>
-
-            <!-- Notifications -->
-            <div class="px-6 py-4">
-                <?php if ($updateSuccess): ?>
-                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
-                        <p class="font-bold">Sukses</p>
-                        <p>Profil berhasil diperbarui</p>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (!empty($errors)): ?>
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
-                        <p class="font-bold">Error</p>
-                        <?php foreach ($errors as $error): ?>
-                            <p><?= htmlspecialchars($error) ?></p>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Profile Form -->
-            <form action="profile.php" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
-                <!-- Profile Image Upload -->
-                <div class="flex flex-col items-center mb-6">
-                    <input type="file" name="profile_image" id="profile_image" class="hidden" accept="image/*" onchange="previewImage(event)">
-                    <label for="profile_image" class="cursor-pointer relative">
-                        <img
-                            id="profile_preview"
-                            src="<?= !empty($user['profile_image']) ? htmlspecialchars($user['profile_image']) : '../assets/images/default-profile.png' ?>"
-                            alt="Profil Pengguna"
-                            class="w-40 h-40 rounded-full object-cover border-4 border-blue-200 hover:border-blue-400 transition">
-                        <div class="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-2 hover:bg-blue-600 transition">
-                            <i class="fas fa-camera"></i>
+        <div class="max-w-3xl mx-auto">
+            <!-- Profile Card -->
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden mb-8">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-white">Edit Profil</h2>
+                        <!-- User Info & Time -->
+                        <div class="text-right">
+                            <div class="text-sm text-blue-100">
+                                Current User's Login: <span class="font-semibold"><?= htmlspecialchars($user['name']) ?></span>
+                            </div>
+                            <div class="text-sm text-blue-100 mt-1">
+                                <span x-data="{ time: '<?= date('Y-m-d H:i:s', strtotime('UTC')) ?>' }"
+                                    x-init="setInterval(() => time = new Date().toISOString().slice(0, 19).replace('T', ' '), 1000)"
+                                    x-text="time"></span> UTC
+                            </div>
                         </div>
-                    </label>
-                    <p class="mt-2 text-sm text-gray-500">Klik foto untuk mengganti</p>
-                </div>
-
-                <!-- Input Fields -->
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">Nama Lengkap</label>
-                        <input
-                            type="text"
-                            name="name"
-                            value="<?= htmlspecialchars($user['name']) ?>"
-                            required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value="<?= htmlspecialchars($user['email']) ?>"
-                            required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
 
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">Nomor Telepon</label>
-                        <input
-                            type="tel"
-                            name="phone_number"
-                            value="<?= htmlspecialchars($user['phone_number'] ?? '') ?>"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-semibold mb-2">Alamat</label>
-                        <textarea
-                            name="address"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
-                    </div>
+                <!-- Notifications -->
+                <div class="px-6 py-4">
+                    <?php if ($updateSuccess): ?>
+                        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                            <p class="font-bold">Sukses!</p>
+                            <p>Profil berhasil diperbarui</p>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($errors)): ?>
+                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+                            <p class="font-bold">Error!</p>
+                            <?php foreach ($errors as $error): ?>
+                                <p><?= htmlspecialchars($error) ?></p>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
-                <!-- Submit Button -->
-                <button
-                    type="submit"
-                    class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-lg hover:from-blue-600 hover:to-blue-700 transition duration-300 transform hover:scale-105">
-                    <i class="fas fa-save mr-2"></i>Perbarui Profil
-                </button>
-            </form>
+                <!-- Profile Image Upload -->
+                <div class="flex flex-col items-center p-6 bg-gray-50">
+                    <div class="relative">
+                        <input type="file" name="profile_image" id="profile_image" class="hidden" accept="image/*" onchange="previewImage(event)">
+                        <label for="profile_image" class="cursor-pointer block">
+                            <div class="p-1 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600">
+                                <img id="profile_preview"
+                                    src="<?= !empty($user['profile_image']) ? htmlspecialchars($user['profile_image']) : '../assets/images/default-profile.png' ?>"
+                                    alt="Profile picture"
+                                    class="w-32 h-32 rounded-full object-cover border-4 border-white">
+                            </div>
+                            <div class="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-2 shadow-lg hover:bg-blue-600 transition">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </label>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">Klik untuk mengganti foto profil</p>
+                </div>
+
+                <!-- Profile Form -->
+                <!-- Profile Form -->
+                <form action="profile.php" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
+                    <!-- User Details Section -->
+                    <div class="bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-user-edit text-blue-500 mr-2"></i>
+                            Informasi Dasar
+                        </h3>
+                        <div class="max-w-xl mx-auto space-y-6"> <!-- Tambahkan max-w-xl dan mx-auto untuk centering -->
+                            <div class="space-y-2">
+                                <label class="block text-gray-700 font-medium">
+                                    <i class="fas fa-user text-blue-500 mr-2"></i>Nama Lengkap
+                                </label>
+                                <input type="text" name="name" value="<?= htmlspecialchars($user['name']) ?>" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-gray-700 font-medium">
+                                    <i class="fas fa-envelope text-blue-500 mr-2"></i>Email
+                                </label>
+                                <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Details Section -->
+                    <div class="bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-address-card text-blue-500 mr-2"></i>
+                            Informasi Kontak
+                        </h3>
+                        <div class="max-w-xl mx-auto space-y-6"> <!-- Tambahkan max-w-xl dan mx-auto untuk centering -->
+                            <div class="space-y-2">
+                                <label class="block text-gray-700 font-medium">
+                                    <i class="fas fa-phone text-blue-500 mr-2"></i>Nomor Telepon
+                                </label>
+                                <input type="tel" name="phone_number" value="<?= htmlspecialchars($user['phone_number'] ?? '') ?>"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-gray-700 font-medium">
+                                    <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>Alamat
+                                </label>
+                                <textarea name="address"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-none h-24"><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-center pt-4">
+                        <button type="submit"
+                            class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-full hover:from-blue-600 hover:to-indigo-700 transition duration-300 flex items-center transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <i class="fas fa-save mr-2"></i>
+                            Perbarui Profil
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </main>
 
@@ -255,20 +287,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </div>
     </footer>
-
-    <script>
-        function previewImage(event) {
-            const input = event.target;
-            const preview = document.getElementById('profile_preview');
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
 </body>
 
 </html>
+<script>
+    // Profile Image Preview with enhancement
+    function previewImage(event) {
+        const input = event.target;
+        const preview = document.getElementById('profile_preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                // Add animation
+                preview.classList.add('scale-105');
+                setTimeout(() => preview.classList.remove('scale-105'), 200);
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Enhanced Real-time UTC Clock
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('clock', () => ({
+            time: '',
+            init() {
+                this.updateTime();
+                setInterval(() => this.updateTime(), 1000);
+            },
+            updateTime() {
+                const now = new Date();
+                // Format: YYYY-MM-DD HH:MM:SS
+                this.time = now.toISOString().slice(0, 19).replace('T', ' ');
+            }
+        }));
+    });
+</script>
