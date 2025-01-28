@@ -273,4 +273,106 @@ class User
             return [];
         }
     }
+    // Di class User.php
+
+    public function getAllAdmins()
+    {
+        try {
+            $query = "SELECT * FROM admin ORDER BY username";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get All Admins Error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function updateAdmin($id, $data)
+    {
+        try {
+            $query = "UPDATE admin 
+                  SET username = :username, 
+                      email = :email, 
+                      name = :name, 
+                      nik = :nik 
+                  WHERE id = :id";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(':username', $data['username']);
+            $stmt->bindParam(':email', $data['email']);
+            $stmt->bindParam(':name', $data['name']);
+            $stmt->bindParam(':nik', $data['nik']);
+            $stmt->bindParam(':id', $id);
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Update Admin Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteAdmin($id)
+    {
+        try {
+            $query = "DELETE FROM admin WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Delete Admin Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function searchAdmins($search)
+    {
+        try {
+            $query = "SELECT * FROM admin 
+                  WHERE username LIKE :search 
+                  OR email LIKE :search 
+                  OR name LIKE :search 
+                  OR nik LIKE :search 
+                  ORDER BY username";
+
+            $searchTerm = "%$search%";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':search', $searchTerm);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Search Admins Error: " . $e->getMessage());
+            return [];
+        }
+    }
+    // Di dalam class User (User.php):
+    public function getUserStatistics($userId)
+    {
+        try {
+            // Get total books borrowed
+            $queryTotal = "SELECT COUNT(*) as total_books FROM book_loans WHERE user_id = ?";
+            $stmtTotal = $this->conn->prepare($queryTotal);
+            $stmtTotal->execute([$userId]);
+            $totalBooks = $stmtTotal->fetch(PDO::FETCH_ASSOC)['total_books'];
+
+            // Get active loans
+            $queryActive = "SELECT COUNT(*) as active_loans FROM book_loans 
+                       WHERE user_id = ? AND status = 'Active'";
+            $stmtActive = $this->conn->prepare($queryActive);
+            $stmtActive->execute([$userId]);
+            $activeLoans = $stmtActive->fetch(PDO::FETCH_ASSOC)['active_loans'];
+
+            return [
+                'total_books' => $totalBooks,
+                'active_loans' => $activeLoans
+            ];
+        } catch (PDOException $e) {
+            error_log("Error in getUserStatistics: " . $e->getMessage());
+            return [
+                'total_books' => 0,
+                'active_loans' => 0
+            ];
+        }
+    }
 }
