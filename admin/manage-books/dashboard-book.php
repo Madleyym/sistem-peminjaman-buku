@@ -1,5 +1,9 @@
 <?php
+
 session_start();
+require_once '../includes/admin-auth.php';
+checkAdminAuth();
+
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -11,108 +15,120 @@ require_once $rootPath . '/config/database.php';
 require_once $rootPath . '/classes/Book.php';
 require_once $rootPath . '/classes/Category.php';
 
+// Inisialisasi objek
 $database = new Database();
 $conn = $database->getConnection();
 $bookManager = new Book($conn);
+$categoryManager = new Category($conn);
 
-$message = '';
-$errorDetails = null;
-
-// Pagination
+// Pagination dan Filter
 $page = $_GET['page'] ?? 1;
 $limit = 10;
 $offset = ($page - 1) * $limit;
-
 $searchQuery = $_GET['search'] ?? '';
 $categoryFilter = $_GET['category'] ?? '';
 
+// Handle Delete Action
+if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    try {
+        if ($bookManager->deleteBook($_GET['id'])) {
+            $_SESSION['message'] = "Buku berhasil dihapus";
+        }
+    } catch (Exception $e) {
+        $_SESSION['error'] = $e->getMessage();
+    }
+    header("Location: " . strtok($_SERVER['REQUEST_URI'], '?'));
+    exit();
+}
 
-// Handle form submissions
-$action = $_GET['action'] ?? '';
-$bookId = $_GET['id'] ?? null;
-
-// Add or Update Book
+// Handle Add/Edit Book
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $bookData = [
-            'title' => $_POST['title'] ?? '',
-            'author' => $_POST['author'] ?? '',
-            'publisher' => $_POST['publisher'] ?? '',
-            'publication_year' => $_POST['year_published'] ?? '',
-            'isbn' => $_POST['isbn'] ?? '',
-            'category_id' => $_POST['category'] ?? '',
-            'total_copies' => $_POST['total_quantity'] ?? '',
-            'description' => $_POST['description'] ?? '',
-            'shelf_location' => $_POST['shelf_location'] ?? ''
+            'title' => trim($_POST['title'] ?? ''),
+            'author' => trim($_POST['author'] ?? ''),
+            'publisher' => trim($_POST['publisher'] ?? ''),
+            'publication_year' => trim($_POST['year_published'] ?? ''),
+            'isbn' => trim($_POST['isbn'] ?? ''),
+            'category_id' => trim($_POST['category'] ?? ''),
+            'total_copies' => trim($_POST['total_quantity'] ?? ''),
+            'description' => trim($_POST['description'] ?? ''),
+            'shelf_location' => trim($_POST['shelf_location'] ?? '')
         ];
 
-        // Validasi data
-        $errors = [];
-        foreach (['title', 'author', 'publisher', 'publication_year', 'category', 'total_copies', 'shelf_location'] as $field) {
-            if (empty($bookData[$field])) {
-                $errors[] = "Field $field wajib diisi";
-            }
-        }
-
-        // Handle cover image upload
         if (!empty($_FILES['cover_image']['name'])) {
-            $targetDir = "../uploads/book_covers/";
-            $fileName = uniqid() . '_' . basename($_FILES['cover_image']['name']);
-            $targetFilePath = $targetDir . $fileName;
-
-            // Validasi file
-            $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
-            $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
-
-            if (!in_array($fileType, $allowedTypes)) {
-                $errors[] = "Tipe file tidak valid. Hanya JPG, JPEG, PNG, dan GIF yang diperbolehkan.";
-            }
-
-            if (empty($errors) && move_uploaded_file($_FILES['cover_image']['tmp_name'], $targetFilePath)) {
-                $bookData['book_cover'] = $fileName;
-            } else {
-                $errors[] = "Gagal mengunggah gambar sampul";
+            $uploadResult = handleBookCoverUpload($_FILES['cover_image']);
+            if ($uploadResult['success']) {
+                $bookData['book_cover'] = $uploadResult['filename'];
             }
         }
 
-        // Jika ada error, lempar exception
-        if (!empty($errors)) {
-            throw new Exception(implode(', ', $errors));
-        }
-
-        // Proses tambah/edit buku
-        if ($action === 'edit' && $bookId) {
-            $result = $bookManager->updateBook($bookId, $bookData);
-            $message = $result ? "Buku berhasil diperbarui" : "Gagal memperbarui buku";
+        $bookId = $_POST['id'] ?? null;
+        if ($bookId) {
+            $bookManager->updateBook($bookId, $bookData);
+            $_SESSION['message'] = "Buku berhasil diperbarui";
         } else {
-            $result = $bookManager->create($bookData);
-            $message = $result ? "Buku berhasil ditambahkan" : "Gagal menambahkan buku";
+            $bookManager->create($bookData);
+            $_SESSION['message'] = "Buku berhasil ditambahkan";
         }
 
-        // Jika gagal, simpan detail error
-        if (!$result) {
-            $errorDetails = $bookData;
-            throw new Exception($message);
-        }
-    } catch (Exception $e) {
-        // Log error
-        error_log($e->getMessage());
-
-        // Redirect dengan pesan error
-        $errorParam = urlencode(json_encode($bookData));
-        header("Location: ?error=" . $errorParam);
+        header("Location: " . strtok($_SERVER['REQUEST_URI'], '?'));
         exit();
+    } catch (Exception $e) {
+        $_SESSION['error'] = $e->getMessage();
     }
 }
 
-// Ambil daftar buku
-$categoryManager = new Category($conn);
-$categories = $categoryManager->getAllCategories();
+// Perbaikan fungsi handleBookCoverUpload
+function handleBookCoverUpload($file)
+{
+    // Definisikan path absolut untuk direktori upload
+    $targetDir = __DIR__ . "/../../uploads/book_covers/";
 
+    // Pastikan direktori ada
+    if (!file_exists($targetDir)) {
+        mkdir($targetDir, 0777, true);
+    }
+
+    // Validasi ukuran file (max 5MB)
+    if ($file['size'] > 5000000) {
+        throw new Exception("Ukuran file terlalu besar. Maksimal 5MB.");
+    }
+
+    $fileName = uniqid() . '_' . basename($file['name']);
+    $targetPath = $targetDir . $fileName;
+
+    $fileType = strtolower(pathinfo($targetPath, PATHINFO_EXTENSION));
+    $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+
+    if (!in_array($fileType, $allowedTypes)) {
+        throw new Exception("Tipe file tidak valid. Hanya JPG, JPEG, PNG, dan GIF yang diperbolehkan.");
+    }
+
+    // Debug information
+    error_log("Upload Path: " . $targetPath);
+    error_log("Directory exists: " . (file_exists($targetDir) ? 'Yes' : 'No'));
+    error_log("Directory writable: " . (is_writable($targetDir) ? 'Yes' : 'No'));
+
+    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+        throw new Exception("Gagal mengunggah file: " . error_get_last()['message']);
+    }
+
+    return [
+        'success' => true,
+        'filename' => $fileName
+    ];
+}
+// Get Data
+$categories = $categoryManager->getAllCategories();
 $books = $bookManager->getAllBooks($limit, $offset, $searchQuery, $categoryFilter);
 $totalBooks = $bookManager->countTotalBooks($searchQuery, $categoryFilter);
 $totalPages = ceil($totalBooks / $limit);
 
+// Messages
+$message = $_SESSION['message'] ?? '';
+$error = $_SESSION['error'] ?? '';
+unset($_SESSION['message'], $_SESSION['error']);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -124,7 +140,13 @@ $totalPages = ceil($totalBooks / $limit);
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
         :root {
             --primary-color: #3498db;
             --secondary-color: #2ecc71;
@@ -184,357 +206,425 @@ $totalPages = ceil($totalBooks / $limit);
     </style>
 </head>
 
-<body x-data="{ mobileMenuOpen: false }">
+<!-- START: MAIN LAYOUT -->
+
+<body x-data="bookManager">
     <!-- Navigation Component -->
-    <nav class="bg-blue-700 text-white">
+    <nav x-data="{ open: false }" class="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <div class="flex items-center justify-between w-full">
-                    <a href="/sistem/public/index.php" class="font-bold text-xl">
-                        <?= htmlspecialchars(SITE_NAME) ?>
+                <div class="flex items-center">
+                    <a href="/sistem/admin/admin-index.php" class="flex items-center group">
+                        <i class="fas fa-book-reader text-white text-2xl mr-2 transform group-hover:scale-110 transition-transform"></i>
+                        <span class="text-white font-bold text-xl"><?= htmlspecialchars(SITE_NAME) ?></span>
                     </a>
+                </div>
 
-                    <!-- Desktop Navigation -->
-                    <div class="hidden md:flex items-center space-x-4">
-                        <a href="/sistem/public/index.php" class="hover:bg-blue-600 px-3 py-2 rounded-md text-sm">Beranda</a>
-                        <a href="/sistem/public/books.php" class="hover:bg-blue-600 px-3 py-2 rounded-md text-sm">Buku</a>
-                        <a href="/sistem/public/admin/master-data.php" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-full text-sm">Master Data</a>
-                        <a href="/sistem/admin/auth/logout.php" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full text-sm">Keluar</a>
+                <!-- Navigation Links -->
+                <!-- Navigation Links -->
+                <div class="hidden md:block">
+                    <div class="flex items-center space-x-4">
+                        <a href="/sistem/public/index.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-home mr-1"></i> Beranda
+                        </a>
+                        <a href="/sistem/public/books.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-book mr-1"></i> Buku
+                        </a>
+                        <a href="/sistem/public/contact.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-envelope mr-1"></i> Kontak
+                        </a>
+                        <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin'): ?>
+                            <!-- Jika login sebagai admin -->
+                            <div class="flex items-center space-x-3">
+                                <span class="text-white text-sm">
+                                    <i class="fas fa-user-circle mr-1"></i>
+                                    <?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?>
+                                </span>
+                                <a href="/sistem/admin/auth/logout.php"
+                                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+                                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                                </a>
+                            </div>
+                        <?php else: ?>
+                            <?php if (!isset($_SESSION['user_id'])): ?>
+                                <!-- Jika belum login -->
+                                <a href="/sistem/admin/auth/login.php"
+                                    class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                                    <i class="fas fa-sign-in-alt mr-1"></i> Login Admin
+                                </a>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
+                </div>
 
-                    <!-- Mobile Menu Toggle -->
-                    <button
-                        @click="mobileMenuOpen = !mobileMenuOpen"
-                        class="md:hidden text-white focus:outline-none">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            <path x-show="mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                <!-- Improved Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button @click="open = !open" class="text-white hover:bg-blue-700 p-2 rounded-md transition-colors duration-300">
+                        <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Mobile Menu Dropdown -->
-            <div
-                x-show="mobileMenuOpen"
-                x-transition
-                class="md:hidden bg-blue-600 absolute left-0 right-0">
-                <div class="px-4 pt-2 pb-4 space-y-2">
-                    <a href="/sistem/public/index.php" class="block px-3 py-2 rounded-md hover:bg-blue-500">Beranda</a>
-                    <a href="/sistem/public/books.php" class="block px-3 py-2 rounded-md hover:bg-blue-500">Buku</a>
-                    <a href="/sistem/public/admin/master-data.php" class="block px-3 py-2 bg-green-500 hover:bg-green-600 rounded-md">Master Data</a>
-                    <a href="/sistem/admin/auth/logout.php" class="block px-3 py-2 bg-red-600 hover:bg-red-700 rounded-md">Keluar</a>
-                </div>
+        <!-- Enhanced Mobile Menu with Smooth Transitions -->
+        <div x-show="open"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 transform -translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform -translate-y-2"
+            class="md:hidden bg-blue-800">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="/sistem/public/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
+                    <i class="fas fa-home mr-1"></i> Beranda
+                </a>
+                <a href="/sistem/public/books.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
+                    <i class="fas fa-book mr-1"></i> Buku
+                </a>
+                <a href="/sistem/public/contact.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
+                    <i class="fas fa-envelope mr-1"></i> Kontak
+                </a>
             </div>
         </div>
     </nav>
 
-    <main x-data="{ openModal: false, currentBook: null }" class="container mx-auto px-4 py-8">
+    <!-- START: MAIN CONTENT -->
+    <main x-data="bookManager" class="container mx-auto px-4 py-8">
         <div class="space-y-6">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-blue-700">Manajemen Buku</h1>
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                <h1 class="text-2xl md:text-3xl font-bold text-blue-700">Manajemen Buku</h1>
                 <button
-                    @click="openModal = true; currentBook = null"
-                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center">
+                    @click="openAddModal()"
+                    class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Tambah Buku Baru
+                    <span>Tambah Buku Baru</span>
                 </button>
             </div>
 
             <!-- Search and Filter Section -->
-            <div class="bg-white shadow rounded-lg p-6 mb-6 mobile-stack">
-                <form method="get" class="grid md:grid-cols-3 gap-4">
+            <div class="bg-white shadow rounded-lg p-4 md:p-6">
+                <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <input
                         type="text"
                         name="search"
                         placeholder="Cari buku..."
                         value="<?= htmlspecialchars($searchQuery) ?>"
-                        class="px-4 py-2 border rounded-lg">
-                    <select name="category" class="px-4 py-2 border rounded-lg">
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select
+                        name="category"
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Semua Kategori</option>
-                        <?php foreach ($categoryList as $cat): ?>
-                            <option
-                                value="<?= $cat['id'] ?>"
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= $cat['id'] ?>"
                                 <?= $categoryFilter == $cat['id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($cat['name']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Cari</button>
+                    <button type="submit"
+                        class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-150 ease-in-out">
+                        Cari
+                    </button>
                 </form>
             </div>
 
-            <!-- Books Grid -->
-            <div class="grid md:grid-cols-3 gap-6 responsive-grid">
-                <?php foreach ($books as $book): ?>
-                    <div class="book-card bg-white shadow rounded-lg p-4">
-                        <div class="flex space-x-4 mb-4">
-                            <img
-                                src="/uploads/book_covers/<?= htmlspecialchars($book['cover_image'] ?? 'default.jpg') ?>"
-                                alt="Cover Buku"
-                                class="w-24 h-36 object-cover rounded-lg">
-                            <div>
-                                <h3 class="text-lg font-bold"><?= htmlspecialchars($book['title']) ?></h3>
-                                <p class="text-sm text-gray-600">
-                                    <?= htmlspecialchars($book['author']) ?> |
-                                    <?= htmlspecialchars($book['publisher']) ?> (<?= $book['year_published'] ?>)
-                                </p>
-                                <p class="text-sm text-gray-500 mt-2">
-                                    Kategori: <?= htmlspecialchars($book['category']) ?> |
-                                    Rak: <?= htmlspecialchars($book['shelf_location']) ?>
-                                </p>
-                            </div>
+            <!-- Books List -->
+            <div class="bg-white shadow rounded-lg overflow-hidden overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buku</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Detail</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Lokasi</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php foreach ($books as $book): ?>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <img src="/sistem/uploads/book_covers/<?= htmlspecialchars($book['cover_image'] ?? 'default.jpg') ?>"
+                                            alt="Cover Buku"
+                                            class="h-16 w-12 object-cover rounded hidden md:block"
+                                            onerror="this.src='/sistem/uploads/book_covers/default.jpg'">
+                                        <div class="ml-0 md:ml-4">
+                                            <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($book['title']) ?></div>
+                                            <div class="text-sm text-gray-500 md:hidden">
+                                                <?= htmlspecialchars($book['author']) ?><br>
+                                                ISBN: <?= htmlspecialchars($book['isbn']) ?>
+                                            </div>
+                                            <div class="text-sm text-gray-500 hidden md:block"><?= htmlspecialchars($book['author']) ?></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 hidden md:table-cell">
+                                    <div class="text-sm text-gray-900"><?= htmlspecialchars($book['publisher']) ?> (<?= $book['year_published'] ?>)</div>
+                                    <div class="text-sm text-gray-500">ISBN: <?= htmlspecialchars($book['isbn']) ?></div>
+                                    <div class="text-sm text-gray-500">Kategori: <?= htmlspecialchars($book['category']) ?></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="text-sm <?= $book['available_quantity'] < 5 ? 'text-red-500' : 'text-green-500' ?>">
+                                        <?= $book['available_quantity'] ?> / <?= $book['total_quantity'] ?>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 hidden md:table-cell">
+                                    <div class="text-sm text-gray-900"><?= htmlspecialchars($book['shelf_location']) ?></div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end space-x-2">
+                                        <button
+                                            type="button"
+                                            class="text-blue-500 hover:text-blue-700"
+                                            @click="openEditModal(<?= htmlspecialchars(json_encode($book)) ?>)">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="text-red-500 hover:text-red-700"
+                                            @click="confirmDelete(<?= $book['id'] ?>)">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modal -->
+            <div x-show="isModalOpen"
+                x-cloak
+                class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div @click.away="isModalOpen = false"
+                    class="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-blue-700" x-text="editingBook.id ? 'Edit Buku' : 'Tambah Buku Baru'"></h2>
+                            <button @click="isModalOpen = false" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <span class="<?= $book['available_quantity'] < 5 ? 'text-red-500' : 'text-green-500' ?>">
-                                    Stok: <?= $book['total_quantity'] ?> / <?= $book['available_quantity'] ?>
-                                </span>
-                                <p class="text-xs text-gray-500">ISBN: <?= htmlspecialchars($book['isbn']) ?></p>
+
+                        <!-- Form Modal Content - Lengkap -->
+                        <form method="post" enctype="multipart/form-data" @submit.prevent="submitForm">
+                            <input type="hidden" name="id" x-model="editingBook.id">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Kolom Kiri -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Judul Buku <span class="text-red-500">*</span></label>
+                                    <input type="text"
+                                        name="title"
+                                        x-model="editingBook.title"
+                                        required
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Penulis <span class="text-red-500">*</span></label>
+                                    <input type="text"
+                                        name="author"
+                                        x-model="editingBook.author"
+                                        required
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Penerbit <span class="text-red-500">*</span></label>
+                                    <input type="text"
+                                        name="publisher"
+                                        x-model="editingBook.publisher"
+                                        required
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Tahun Publikasi <span class="text-red-500">*</span></label>
+                                    <input type="number"
+                                        name="year_published"
+                                        x-model="editingBook.year_published"
+                                        required
+                                        min="1900"
+                                        :max="new Date().getFullYear()"
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">ISBN</label>
+                                    <input type="text"
+                                        name="isbn"
+                                        x-model="editingBook.isbn"
+                                        placeholder="Format: XXX-XXX-XXX"
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Kategori <span class="text-red-500">*</span></label>
+                                    <select name="category"
+                                        x-model="editingBook.category"
+                                        required
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Pilih Kategori</option>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= $cat['id'] ?>">
+                                                <?= htmlspecialchars($cat['name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Total Kuantitas <span class="text-red-500">*</span></label>
+                                    <input type="number"
+                                        name="total_quantity"
+                                        x-model="editingBook.total_quantity"
+                                        required
+                                        min="0"
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Kuantitas Tersedia <span class="text-red-500">*</span></label>
+                                    <input type="number"
+                                        name="available_quantity"
+                                        x-model="editingBook.available_quantity"
+                                        required
+                                        min="0"
+                                        :max="editingBook.total_quantity"
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Lokasi Rak <span class="text-red-500">*</span></label>
+                                    <input type="text"
+                                        name="shelf_location"
+                                        x-model="editingBook.shelf_location"
+                                        required
+                                        placeholder="Contoh: A-01"
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+
+                                <!-- Fields yang mengambil full width -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium mb-2">Deskripsi Buku</label>
+                                    <textarea name="description"
+                                        x-model="editingBook.description"
+                                        rows="4"
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Masukkan deskripsi buku..."></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium mb-2">Sampul Buku</label>
+                                    <div class="flex items-center space-x-4">
+                                        <!-- Preview gambar yang ada -->
+                                        <div x-show="editingBook.cover_image" class="w-24">
+                                            <img :src="'/uploads/book_covers/' + editingBook.cover_image"
+                                                alt="Preview"
+                                                class="w-full h-32 object-cover rounded">
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="file"
+                                                name="cover_image"
+                                                accept="image/*"
+                                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                Format yang didukung: JPG, JPEG, PNG. Maksimal 5MB.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex space-x-2">
-                                <a
-                                    href="?action=edit&id=<?= $book['id'] ?>"
-                                    class="text-blue-500 hover:text-blue-700">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </a>
-                                <button
-                                    onclick="confirmDelete(<?= $book['id'] ?>)"
-                                    class="text-red-500 hover:text-red-700">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
+
+                            <!-- Tombol aksi -->
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button"
+                                    @click="isModalOpen = false"
+                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-150">
+                                    Batal
+                                </button>
+                                <button type="submit"
+                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-150">
+                                    <span x-text="editingBook.id ? 'Update Buku' : 'Simpan Buku'"></span>
                                 </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Modal for Add/Edit Book -->
-            <div
-                x-show="openModal"
-                class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
-                <div
-                    @click.away="openModal = false"
-                    class="bg-white rounded-lg w-full max-w-3xl p-8 max-h-[90vh] overflow-y-auto">
-                    <h2 x-text="currentBook ? 'Edit Buku' : 'Tambah Buku Baru'" class="text-2xl font-bold mb-6 text-blue-700"></h2>
-
-                    <form
-                        method="post"
-                        enctype="multipart/form-data"
-                        x-ref="bookForm">
-                        <input type="hidden" name="action" :value="currentBook ? 'edit' : 'add'">
-                        <input type="hidden" name="id" x-model="currentBook?.id">
-
-                        <div class="grid md:grid-cols-2 gap-6 mobile-stack">
-                            <div>
-                                <label class="block mb-2">Judul Buku</label>
-                                <input
-                                    type="text"
-                                    name="title"
-                                    x-model="currentBook?.title"
-                                    required
-                                    class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block mb-2">Penulis</label>
-                                <input
-                                    type="text"
-                                    name="author"
-                                    x-model="currentBook?.author"
-                                    required
-                                    class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block mb-2">Penerbit</label>
-                                <input
-                                    type="text"
-                                    name="publisher"
-                                    x-model="currentBook?.publisher"
-                                    required
-                                    class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block mb-2">Tahun Publikasi</label>
-                                <input
-                                    type="number"
-                                    name="year_published"
-                                    x-model="currentBook?.year_published"
-                                    required
-                                    class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block mb-2">ISBN</label>
-                                <input
-                                    type="text"
-                                    name="isbn"
-                                    x-model="currentBook?.isbn"
-                                    class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block mb-2">Kategori</label>
-                                <select
-                                    name="category"
-                                    x-model="currentBook?.category"
-                                    required
-                                    class="w-full px-4 py-2 border rounded-lg">
-                                    <?php foreach ($categories as $cat): ?>
-                                        <option value="<?= $cat['id'] ?>">
-                                            <?= htmlspecialchars($cat['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block mb-2">Total Kuantitas</label>
-                                <input
-                                    type="number"
-                                    name="total_quantity"
-                                    x-model="currentBook?.total_quantity"
-                                    required
-                                    class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block mb-2">Kuantitas Tersedia</label>
-                                <input
-                                    type="number"
-                                    name="available_quantity"
-                                    x-model="currentBook?.available_quantity"
-                                    required
-                                    class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block mb-2">Lokasi Rak</label>
-                                <input
-                                    type="text"
-                                    name="shelf_location"
-                                    x-model="currentBook?.shelf_location"
-                                    required
-                                    class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block mb-2">Deskripsi Buku</label>
-                                <textarea
-                                    name="description"
-                                    x-model="currentBook?.description"
-                                    rows="4"
-                                    class="w-full px-4 py-2 border rounded-lg"></textarea>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block mb-2">Sampul Buku</label>
-                                <input
-                                    type="file"
-                                    name="cover_image"
-                                    accept="image/*"
-                                    class="w-full px-4 py-2 border rounded-lg">
-                                <p x-show="currentBook?.cover_image" class="text-sm text-gray-500 mt-2">
-                                    Sampul saat ini: <span x-text="currentBook?.cover_image"></span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 flex justify-end space-x-4">
-                            <button
-                                type="button"
-                                @click="openModal = false"
-                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">
-                                Batal
-                            </button>
-                            <button
-                                type="submit"
-                                class="px-4 py-2 bg-blue-500 text-white rounded-lg">
-                                Simpan
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
+        </div>
     </main>
-</body>
-<script>
-    function confirmDelete(bookId) {
-        if (confirm('Yakin ingin menghapus buku ini?')) {
-            window.location.href = `?action=delete&id=${bookId}`;
-        }
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tangani pesan dari server
-        const message = "<?= isset($message) ? htmlspecialchars($message) : '' ?>";
-        if (message) {
-            alert(message);
-        }
 
-        // Form submission handling
-        const form = document.querySelector('form[x-ref="bookForm"]');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                // Basic client-side validation
-                const requiredFields = form.querySelectorAll('[required]');
-                let isValid = true;
+    <!-- Alpine.js Script -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('bookManager', () => ({
+                isModalOpen: false,
+                editingBook: {
+                    id: null,
+                    title: '',
+                    author: '',
+                    publisher: '',
+                    year_published: '',
+                    isbn: '',
+                    category: '',
+                    total_quantity: '',
+                    available_quantity: '',
+                    shelf_location: '',
+                    description: '',
+                },
 
-                requiredFields.forEach(field => {
-                    if (!field.value.trim()) {
-                        field.classList.add('border-red-500');
-                        isValid = false;
-                    } else {
-                        field.classList.remove('border-red-500');
+                openAddModal() {
+                    this.editingBook = {
+                        id: null,
+                        title: '',
+                        author: '',
+                        publisher: '',
+                        year_published: '',
+                        isbn: '',
+                        category: '',
+                        total_quantity: '',
+                        available_quantity: '',
+                        shelf_location: '',
+                        description: '',
+                    };
+                    this.isModalOpen = true;
+                },
+
+                openEditModal(book) {
+                    this.editingBook = {
+                        ...book
+                    };
+                    this.isModalOpen = true;
+                },
+
+                confirmDelete(id) {
+                    if (confirm('Apakah Anda yakin ingin menghapus buku ini?')) {
+                        window.location.href = `?action=delete&id=${id}`;
                     }
-                });
+                },
 
-                // Validasi ISBN
-                const isbnField = form.querySelector('input[name="isbn"]');
-                if (isbnField && isbnField.value.trim()) {
-                    const isbnRegex = /^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/;
-                    if (!isbnRegex.test(isbnField.value)) {
-                        isbnField.classList.add('border-red-500');
-                        isValid = false;
-                    } else {
-                        isbnField.classList.remove('border-red-500');
-                    }
+                submitForm(e) {
+                    const form = e.target;
+                    const formData = new FormData(form);
+                    formData.append('action', this.editingBook.id ? 'edit' : 'add');
+                    form.submit();
                 }
-
-                // Prevent form submission if validation fails
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Harap isi semua kolom yang wajib dengan benar.');
-                    return false;
-                }
-
-                // Disable submit button to prevent multiple submissions
-                const submitButton = form.querySelector('button[type="submit"]');
-                submitButton.disabled = true;
-                submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-
-                // Tambahkan logging untuk debugging
-                console.log('Form submitted', Object.fromEntries(new FormData(form)));
-            });
-        }
-
-        // Tambahkan event listener untuk membuka modal kembali jika ada error
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                // Halaman di-load dari cache browser
-                const urlParams = new URLSearchParams(window.location.search);
-                const errorParam = urlParams.get('error');
-
-                if (errorParam) {
-                    // Gunakan Alpine.js untuk membuka modal
-                    if (window.Alpine) {
-                        window.Alpine.store('bookModal', {
-                            open: true,
-                            currentBook: JSON.parse(decodeURIComponent(errorParam))
-                        });
-                    }
-                }
-            }
-        });
-    });
-</script>
+            }))
+        })
+    </script>
 
 </html>
 <footer class="bg-gray-900 text-white py-8">
