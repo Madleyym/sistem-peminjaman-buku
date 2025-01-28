@@ -466,16 +466,50 @@ try {
 
 </body>
 <script>
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Login status check with loading state
     function checkLoginStatus(bookId) {
+        const button = event.currentTarget;
+        button.classList.add('loading');
+
         <?php if (empty($_SESSION['user_id'])): ?>
-            // Show login/register modal or redirect
-            $('#loginModal').modal('show');
-            $('#loginModal').find('#redirect-book-id').val(bookId);
+            setTimeout(() => {
+                button.classList.remove('loading');
+                window.location.href = '/sistem/public/auth/login.php?redirect=' + encodeURIComponent(window.location.pathname + '?book=' + bookId);
+            }, 500);
         <?php else: ?>
-            // Redirect to book detail page
-            window.location.href = 'books-detail.php?id=' + bookId;
+            setTimeout(() => {
+                button.classList.remove('loading');
+                window.location.href = 'books-detail.php?id=' + bookId;
+            }, 500);
         <?php endif; ?>
     }
+
+    // Intersection Observer for lazy loading images
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = document.querySelectorAll('img[data-src]');
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        images.forEach(img => imageObserver.observe(img));
+    });
 </script>
 
 </html>
