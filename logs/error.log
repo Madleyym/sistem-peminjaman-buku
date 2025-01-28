@@ -1,4 +1,123 @@
 error_reporting = E_ALL
 display_errors = On
 log_errors = On
-error_log = "C:\xampp\htdocs\sistem\logs\error.log"
+error_log = "C:\xampp\htdocs\sistem\logs\error.log"[26-Jan-2025 05:16:56 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 33
+[26-Jan-2025 05:16:56 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:33
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 33
+[26-Jan-2025 05:19:09 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 33
+[26-Jan-2025 05:19:09 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:33
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 33
+[26-Jan-2025 05:21:15 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:21:15 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:34
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:21:41 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan../../../../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:21:41 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan../../../../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:34
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:22:03 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan../../../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:22:03 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan../../../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:34
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:22:12 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan../../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:22:12 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan../../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:34
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:23:25 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan../../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:23:25 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan../../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:34
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:23:55 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:23:55 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:34
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 34
+[26-Jan-2025 05:24:27 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public/config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 35
+[26-Jan-2025 05:24:27 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public/config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 35
+[26-Jan-2025 05:25:16 Europe/Berlin] PHP Warning:  require_once(C:\xampp\php\pear): Failed to open stream: Permission denied in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 35
+[26-Jan-2025 05:25:16 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required '' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 35
+[26-Jan-2025 05:25:23 Europe/Berlin] PHP Warning:  require_once(C:\xampp\php\pear): Failed to open stream: Permission denied in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:25:23 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required '' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:32
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:25:46 Europe/Berlin] PHP Warning:  require_once(C:\xampp\php\pear): Failed to open stream: Permission denied in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:25:46 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required '' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:32
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:29:38 Europe/Berlin] PHP Warning:  require_once(/sistem/config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:29:38 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required '/sistem/config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:32
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:29:56 Europe/Berlin] PHP Warning:  require_once(C:\xampp\php\pear): Failed to open stream: Permission denied in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:29:56 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required '' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:32
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:31:11 Europe/Berlin] PHP Warning:  require_once(C:\xampp\php\pear): Failed to open stream: Permission denied in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:31:11 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required '' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:32
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:31:12 Europe/Berlin] PHP Warning:  require_once(C:\xampp\php\pear): Failed to open stream: Permission denied in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:31:12 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required '' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:32
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 32
+[26-Jan-2025 05:32:54 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:32:54 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:13
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:33:46 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../vendor/autoload.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:33:46 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../vendor/autoload.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:13
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:38:34 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../vendor/autoload.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:38:34 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../vendor/autoload.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:13
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:38:36 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../vendor/autoload.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:38:36 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../vendor/autoload.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:13
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:39:17 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../vendor/autoload.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:39:17 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../vendor/autoload.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:13
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 13
+[26-Jan-2025 05:40:12 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 14
+[26-Jan-2025 05:40:12 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:14
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 14
+[26-Jan-2025 05:41:21 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../../config/constants.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 14
+[26-Jan-2025 05:41:21 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../../config/constants.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:14
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 14
+[26-Jan-2025 05:41:45 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../../config/database.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 15
+[26-Jan-2025 05:41:45 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\sistem\public\auth\users\manage-loan/../../../config/database.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php:15
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\sistem\public\auth\users\manage-loan\loan.php on line 15
