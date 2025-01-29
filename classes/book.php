@@ -264,43 +264,38 @@ class Book
     public function create($data)
     {
         $query = "INSERT INTO {$this->table_name} 
-              (title, author, publisher, year_published, isbn, category, 
-               total_quantity, available_quantity, cover_image, description, 
-               shelf_location)
-              VALUES 
-              (:title, :author, :publisher, :year_published, :isbn, :category,
-               :total_quantity, :available_quantity, :cover_image, :description,
-               :shelf_location)";
+          (title, author, publisher, year_published, isbn, category, 
+           total_quantity, available_quantity, cover_image, description, 
+           shelf_location)
+          VALUES 
+          (:title, :author, :publisher, :year_published, :isbn, :category,
+           :total_quantity, :available_quantity, :cover_image, :description,
+           :shelf_location)";
 
         $stmt = $this->conn->prepare($query);
 
-        // Sanitize input
+        // Sanitize input - Updated parameter names to match form
         $sanitizedData = [
             'title' => htmlspecialchars(trim($data['title'])),
             'author' => htmlspecialchars(trim($data['author'])),
             'publisher' => htmlspecialchars(trim($data['publisher'])),
-            'year_published' => intval($data['publication_year']),
+            'year_published' => intval($data['year_published']), // Changed from publication_year
             'isbn' => trim($data['isbn']),
             'category' => htmlspecialchars(trim($data['category'])),
-            'total_quantity' => intval($data['total_copies']),
-            'available_quantity' => intval($data['total_copies']),
-            'cover_image' => $data['book_cover'] ?? null,
+            'total_quantity' => intval($data['total_quantity']), // Changed from total_copies
+            'available_quantity' => intval($data['available_quantity']), // Changed to use available_quantity
+            'cover_image' => $data['cover_image'] ?? null, // Changed from book_cover
             'description' => htmlspecialchars(trim($data['description'])),
             'shelf_location' => htmlspecialchars(trim($data['shelf_location']))
         ];
 
+        // Debug log
+        error_log("Sanitized Data: " . print_r($sanitizedData, true));
+
         // Bind parameters
-        $stmt->bindParam(':title', $sanitizedData['title']);
-        $stmt->bindParam(':author', $sanitizedData['author']);
-        $stmt->bindParam(':publisher', $sanitizedData['publisher']);
-        $stmt->bindParam(':year_published', $sanitizedData['year_published']);
-        $stmt->bindParam(':isbn', $sanitizedData['isbn']);
-        $stmt->bindParam(':category', $sanitizedData['category']);
-        $stmt->bindParam(':total_quantity', $sanitizedData['total_quantity']);
-        $stmt->bindParam(':available_quantity', $sanitizedData['available_quantity']);
-        $stmt->bindParam(':cover_image', $sanitizedData['cover_image']);
-        $stmt->bindParam(':description', $sanitizedData['description']);
-        $stmt->bindParam(':shelf_location', $sanitizedData['shelf_location']);
+        foreach ($sanitizedData as $key => &$value) {
+            $stmt->bindParam(":$key", $value);
+        }
 
         try {
             return $stmt->execute();
