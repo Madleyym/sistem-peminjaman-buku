@@ -45,15 +45,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 // Handle Add/Edit Book
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
+ try {
         $bookData = [
             'title' => trim($_POST['title'] ?? ''),
             'author' => trim($_POST['author'] ?? ''),
             'publisher' => trim($_POST['publisher'] ?? ''),
-            'publication_year' => trim($_POST['year_published'] ?? ''),
+            'year_published' => trim($_POST['year_published'] ?? ''),
             'isbn' => trim($_POST['isbn'] ?? ''),
-            'category' => trim($_POST['category'] ?? ''), // Diubah dari category_id
-            'total_copies' => trim($_POST['total_quantity'] ?? ''),
+            'category' => trim($_POST['category'] ?? ''),
+            'total_quantity' => (int)trim($_POST['total_quantity'] ?? 0),
+            'available_quantity' => (int)trim($_POST['available_quantity'] ?? 0),
             'description' => trim($_POST['description'] ?? ''),
             'shelf_location' => trim($_POST['shelf_location'] ?? '')
         ];
@@ -517,10 +518,11 @@ unset($_SESSION['message'], $_SESSION['error']);
 
                             <!-- Submit Button (you might want to add this) -->
                             <div class="mt-6 flex justify-end">
-                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                                    Simpan
-                                </button>
-                            </div>
+                                <div class="mt-6 flex justify-end">
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                        Simpan
+                                    </button>
+                                </div>
                         </form>
                     </div>
                 </div>
@@ -533,18 +535,30 @@ unset($_SESSION['message'], $_SESSION['error']);
                         isModalOpen: false,
                         editingBook: {
                             id: null,
-                            title: '',
-                            author: '',
-                            publisher: '',
-                            year_published: '',
-                            isbn: '',
-                            category: '',
-                            total_quantity: '',
-                            available_quantity: '',
-                            shelf_location: '',
-                            description: '',
+                            title: '', // judul
+                            author: '', // penulis
+                            publisher: '', // penerbit
+                            year_published: '', // tahun terbit
+                            isbn: '', // nomor ISBN
+                            category: '', // kategori
+                            total_quantity: '', // jumlah total
+                            available_quantity: '', // jumlah tersedia
+                            description: '', // deskripsi
+                            shelf_location: '', // lokasi rak
+                            cover_image: '' // sampul buku
                         },
-
+                        previewImage(event) {
+                            const file = event.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    const preview = document.getElementById('coverPreview');
+                                    preview.src = e.target.result;
+                                    preview.style.display = 'block';
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        },
                         openAddModal() {
                             this.editingBook = {
                                 id: null,
