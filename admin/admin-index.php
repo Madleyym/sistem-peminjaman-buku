@@ -8,6 +8,7 @@ function checkAdminAuth() {
         exit();
     }
 }
+
 require_once '../config/constants.php';
 require_once '../config/database.php';
 require_once '../classes/Book.php';
@@ -213,13 +214,12 @@ $chart_data = array_column($chart_results, 'total');
     <!-- Main Content with Enhanced Layout -->
     <main class="flex-grow container mx-auto px-4 py-8">
         <!-- Improved Admin Menu Section -->
-        <!-- Improved Admin Menu Section -->
         <section class="bg-white shadow-lg rounded-2xl p-8 mb-8 transform hover:shadow-xl transition-all duration-300">
             <h2 class="text-3xl font-bold text-blue-700 mb-6 flex items-center">
                 <i class="fas fa-tools mr-2"></i>Menu Admin
             </h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin'): ?>
+                <!-- <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin'): ?> -->
                     <!-- Menu khusus admin -->
                     <a href="/sistem/admin/manage-books/dashboard-book.php"
                         class="group card-hover bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
