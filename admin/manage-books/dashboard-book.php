@@ -583,16 +583,6 @@ unset($_SESSION['message'], $_SESSION['error']);
                     }))
                 })
             </script>
-            <footer class="bg-gray-900 text-white py-8 w-full">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <p>&copy; <?= date('Y') ?> <?= htmlspecialchars(SITE_NAME) ?>. All Rights Reserved.</p>
-                    <div class="flex justify-center space-x-4 mt-4">
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </footer>
 </body>
 
 </html>
