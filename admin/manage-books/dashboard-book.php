@@ -45,7 +45,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 // Handle Add/Edit Book
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
- try {
+    try {
         $bookData = [
             'title' => trim($_POST['title'] ?? ''),
             'author' => trim($_POST['author'] ?? ''),
@@ -589,10 +589,23 @@ unset($_SESSION['message'], $_SESSION['error']);
                             }
                         },
 
+                        // Update the submitForm function in Alpine.js
                         submitForm(e) {
                             const form = e.target;
                             const formData = new FormData(form);
+
+                            // Ensure these fields are included
+                            formData.append('total_quantity', this.editingBook.total_quantity);
+                            formData.append('available_quantity', this.editingBook.available_quantity);
+                            formData.append('year_published', this.editingBook.year_published);
+
                             formData.append('action', this.editingBook.id ? 'edit' : 'add');
+
+                            // Debug log
+                            for (let pair of formData.entries()) {
+                                console.log(pair[0] + ': ' + pair[1]);
+                            }
+
                             form.submit();
                         }
                     }))
