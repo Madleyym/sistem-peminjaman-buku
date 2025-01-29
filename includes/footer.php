@@ -17,13 +17,31 @@
         /* Memusatkan teks */
     }
 
-    footer .container {
+    .footer {
+        background-color: #2c3e50;
+        color: var(--white);
+        padding: 40px 0;
+    }
+
+    .footer-container {
         display: grid;
-        /* Gunakan grid untuk tata letak kolom */
-        grid-template-columns: 1fr;
-        /* Semua kolom menumpuk di layar kecil */
-        gap: 20px;
-        /* Jarak antar item */
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+
+    .footer-section h4 {
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+    }
+
+    .footer-links a {
+        color: #bdc3c7;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        color: var(--white);
     }
 
     @media (min-width: 768px) {
