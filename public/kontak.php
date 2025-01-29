@@ -187,65 +187,8 @@ $pageDescription = "Hubungi Kami untuk Pertanyaan dan Dukungan";
         </div>
     </main>
 
-    <!-- Footer (Copied from index.php) -->
-    <footer class="bg-gray-800 text-white py-12">
-        <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
-            <div>
-                <h4 class="text-xl font-bold mb-4"><?= htmlspecialchars(SITE_NAME) ?></h4>
-                <p class="text-gray-400">Platform peminjaman buku digital modern dan efisien</p>
-                <div class="flex space-x-4 mt-4">
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-            <div>
-                <h4 class="text-xl font-bold mb-4">Tautan Cepat</h4>
-                <ul class="space-y-2">
-                    <li><a href="/sistem/beranda-pengguna.php " class="text-gray-300 hover:text-white">Beranda</a></li>
-                    <li><a href="/buku" class="text-gray-300 hover:text-white">Buku</a></li>
-                    <li><a href="/kontak" class="text-gray-300 hover:text-white">Kontak</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-xl font-bold mb-4">Hubungi Kami</h4>
-                <p class="text-gray-400 mb-2">Email: support@perpustakaan.com</p>
-                <p class="text-gray-400 mb-2">Telepon: +62 888 1234 5678</p>
-                <p class="text-gray-400">Alamat: Jl. Perpustakaan No. 123, Kota</p>
-            </div>
-        </div>
-        <div class="text-center text-gray-500 mt-8 pt-4 border-t border-gray-700">
-            &copy; <?= date('Y') ?> <?= htmlspecialchars(SITE_NAME) ?>. Hak Cipta Dilindungi.
-        </div>
-        <form action="submit_contact.php" method="POST" class="space-y-4">
-            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-
-            <!-- Tampilan error -->
-            <?php if (isset($_SESSION['message']) && $_SESSION['message']['type'] === 'error'): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">Error!</strong>
-                    <span class="block sm:inline"><?= htmlspecialchars($_SESSION['message']['text']) ?></span>
-                </div>
-            <?php
-                // Hapus pesan error setelah ditampilkan
-                unset($_SESSION['message']);
-            endif;
-            ?>
-
-            <!-- Tampilan sukses -->
-            <?php if (isset($_SESSION['message']) && $_SESSION['message']['type'] === 'success'): ?>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">Sukses!</strong>
-                    <span class="block sm:inline"><?= htmlspecialchars($_SESSION['message']['text']) ?></span>
-                </div>
-            <?php
-                // Hapus pesan sukses setelah ditampilkan
-                unset($_SESSION['message']);
-            endif;
-            ?>
-        </form>
-
-    </footer>
+    <!-- Footer -->
+    <?php include '../includes/footer.php'; ?>
 </body>
 
 </html>
