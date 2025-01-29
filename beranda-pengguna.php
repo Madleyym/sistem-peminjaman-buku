@@ -1,15 +1,13 @@
 <?php
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-session_start(); 
+session_start();
 
-// require_once __DIR__ . '/vendor/autoload.php';
-
-require_once './config/constants.php';
-require_once './config/database.php';
-require_once './classes/Book.php';
+require_once __DIR__ . '/config/bootstrap.php';
+require_once __DIR__ . '/config/constants.php';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/classes/Book.php';
 
 // Validate constants are defined
 if (!defined('SITE_NAME')) {
@@ -425,13 +423,20 @@ try {
                         <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-2 transition duration-300 p-4 flex flex-col">
                             <div class="relative mb-4">
                                 <img
-                                    src="<?= !empty($book['cover_image']) ? htmlspecialchars($book['cover_image']) : '../assets/images/default-book-cover.jpg' ?>"
+                                    src="<?php
+                                            if (!empty($book['cover_image'])) {
+                                                echo UPLOAD_URL . '/' . htmlspecialchars($book['cover_image']);
+                                            } else {
+                                                echo BASE_URL . '/assets/images/default-book-cover.jpg';
+                                            }
+                                            ?>"
                                     alt="<?= htmlspecialchars($book['title']) ?>"
                                     class="w-full h-64 object-cover rounded-xl">
                                 <span class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                                     Baru
                                 </span>
                             </div>
+
 
                             <div class="flex-grow flex flex-col">
                                 <h3 class="font-semibold text-lg text-gray-800 mb-1 line-clamp-2 h-12">
