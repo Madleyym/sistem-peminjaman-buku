@@ -197,46 +197,6 @@ try {
             grid-template-columns: 1fr;
         }
     }
-
-    /* Footer Styles */
-    .site-footer {
-        background-color: var(--text-color);
-        color: var(--white);
-        padding: 40px 0;
-    }
-
-    .footer-content {
-        display: flex;
-        justify-content: space-between;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
-    }
-
-    .footer-section {
-        flex: 1;
-        margin-right: 20px;
-    }
-
-    .footer-section:last-child {
-        margin-right: 0;
-    }
-
-    .footer-section h4 {
-        margin-bottom: 15px;
-        color: var(--white);
-    }
-
-    .footer-links a {
-        color: var(--white);
-        opacity: 0.7;
-        text-decoration: none;
-        transition: opacity 0.3s ease;
-    }
-
-    .footer-links a:hover {
-        opacity: 1;
-    }
 </style>
 
 <body class="bg-gray-50 font-inter min-h-screen flex flex-col">
@@ -400,36 +360,7 @@ try {
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-12">
-        <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
-            <div>
-                <h4 class="text-xl font-bold mb-4"><?= htmlspecialchars(SITE_NAME) ?></h4>
-                <p class="text-gray-400">Platform peminjaman buku digital modern dan efisien</p>
-                <div class="flex space-x-4 mt-4">
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-            <div>
-                <h4 class="text-xl font-bold mb-4">Tautan Cepat</h4>
-                <ul class="space-y-2">
-                    <li><a href="./sistem/beranda-pengguna.php" class="text-gray-300 hover:text-white">Beranda</a></li>
-                    <li><a href="/buku.php" class="text-gray-300 hover:text-white">Buku</a></li>
-                    <li><a href="/kirim-kontak.php" class="text-gray-300 hover:text-white">Kontak</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-xl font-bold mb-4">Hubungi Kami</h4>
-                <p class="text-gray-400 mb-2">Email: support@perpustakaan.com</p>
-                <p class="text-gray-400 mb-2">Telepon: +62 888 1234 5678</p>
-                <p class="text-gray-400">Alamat: Jl. Perpustakaan No. 123, Kota</p>
-            </div>
-        </div>
-        <div class="text-center text-gray-500 mt-8 pt-4 border-t border-gray-700">
-            &copy; <?= date('Y') ?> <?= htmlspecialchars(SITE_NAME) ?>. Hak Cipta Dilindungi.
-        </div>
-    </footer>
+    <?php include '../includes/footer.php'; ?>
 </body>
 
 </html>
