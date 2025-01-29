@@ -247,32 +247,7 @@ try {
     }
 
     /* Footer */
-    .footer {
-        background-color: #2c3e50;
-        color: var(--white);
-        padding: 40px 0;
-    }
-
-    .footer-container {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 30px;
-    }
-
-    .footer-section h4 {
-        margin-bottom: 15px;
-        font-size: 1.2rem;
-    }
-
-    .footer-links a {
-        color: #bdc3c7;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-
-    .footer-links a:hover {
-        color: var(--white);
-    }
+    
 
     /* Responsive Design */
     @media screen and (max-width: 768px) {
