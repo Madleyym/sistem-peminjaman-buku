@@ -9,7 +9,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $rootPath = realpath(dirname(__DIR__, 2));
-require_once $rootPath . '/vendor/autoload.php';
+// require_once $rootPath . '/vendor/autoload.php';
 require_once $rootPath . '/config/constants.php';
 require_once $rootPath . '/config/database.php';
 require_once $rootPath . '/classes/Book.php';
