@@ -11,7 +11,7 @@ session_start(); // Add session start for consistent navigation
 require_once '../config/constants.php';
 require_once '../config/database.php';
 require_once '../classes/Book.php';
-require_once __DIR__ . '/../vendor/autoload.php';
+// require_once __DIR__ . '/../vendor/autoload.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -390,7 +390,7 @@ try {
                             </div>
 
                             <a
-                                href="/sistem/public/books-detail.php ?id=<?= $book['id'] ?>"
+                                href="/sistem/public/detail-buku.php ?id=<?= $book['id'] ?>"
                                 class="w-full py-2.5 rounded-full text-sm font-semibold text-center bg-blue-500 text-white hover:bg-blue-600 transition duration-300 ease-in-out mt-3">
                                 Detail Buku
                             </a>
