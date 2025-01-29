@@ -2,8 +2,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start(); 
-
+session_start();
+require_once __DIR__ . '/../bootstrap.php';
 require_once '../config/constants.php';
 require_once '../config/database.php';
 require_once '../classes/Book.php';
