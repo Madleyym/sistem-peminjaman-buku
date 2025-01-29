@@ -226,7 +226,7 @@ unset($_SESSION['message'], $_SESSION['error']);
                 <!-- Navigation Links -->
                 <div class="hidden md:block">
                     <div class="flex items-center space-x-4">
-                        <a href="/sistem/public/index.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="/sistem/beranda-pengguna.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
                             <i class="fas fa-home mr-1"></i> Beranda
                         </a>
                         <a href="/sistem/public/books.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
@@ -278,7 +278,7 @@ unset($_SESSION['message'], $_SESSION['error']);
             x-transition:leave-end="opacity-0 transform -translate-y-2"
             class="md:hidden bg-blue-800">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="/sistem/public/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
+                <a href="/sistem/beranda-pengguna.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
                     <i class="fas fa-home mr-1"></i> Beranda
                 </a>
                 <a href="/sistem/public/books.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
