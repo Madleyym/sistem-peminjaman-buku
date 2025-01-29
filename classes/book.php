@@ -12,10 +12,17 @@ class Book
     public function getCategory()
     {
         try {
+            // Debug the query
+            error_log("Executing category query");
+
             $query = "SELECT DISTINCT category FROM {$this->table_name} WHERE category IS NOT NULL ORDER BY category";
             $stmt = $this->conn->prepare($query);
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Categories found: " . print_r($results, true));
+
+            return $results;
         } catch (PDOException $e) {
             error_log("Error getting categories: " . $e->getMessage());
             return [];
