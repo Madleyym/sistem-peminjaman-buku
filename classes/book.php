@@ -159,68 +159,46 @@ class Book
     public function updateBook($bookId, $bookData)
     {
         try {
-            // Validate book ID
-            $bookId = filter_var($bookId, FILTER_VALIDATE_INT);
-            if ($bookId === false) {
-                throw new Exception("Invalid Book ID");
-            }
-
             $sql = "UPDATE {$this->table_name} SET 
-                    title = :title,
-                    author = :author,
-                    publisher = :publisher,
-                    year_published = :year_published,
-                    isbn = :isbn,
-                    category = :category,
-                    total_quantity = :total_quantity,
-                    available_quantity = :available_quantity,
-                    description = :description,
-                    shelf_location = :shelf_location";
-
-            // Add cover image update if provided
-            if (isset($bookData['book_cover'])) {
-                $sql .= ", cover_image = :cover_image";
-            }
-
-            $sql .= " WHERE id = :book_id";
+                title = :title,
+                author = :author,
+                publisher = :publisher,
+                year_published = :year_published,
+                isbn = :isbn,
+                category = :category,
+                total_quantity = :total_quantity,
+                available_quantity = :available_quantity,
+                description = :description,
+                shelf_location = :shelf_location
+                WHERE id = :id";
 
             $stmt = $this->conn->prepare($sql);
 
-            // Bind parameters
+            // Convert numeric values
+            $total_qty = (int)$bookData['total_quantity'];
+            $available_qty = (int)$bookData['available_quantity'];
+            $year = (int)$bookData['year_published'];
+
             $params = [
                 ':title' => $bookData['title'],
                 ':author' => $bookData['author'],
-                ':publisher' => $bookData['publisher'] ?? '',
-                ':year_published' => $bookData['publication_year'],
+                ':publisher' => $bookData['publisher'],
+                ':year_published' => $year,
                 ':isbn' => $bookData['isbn'],
-                ':category' => $bookData['category_id'],
-                ':total_quantity' => $bookData['total_copies'],
-                ':available_quantity' => $bookData['total_copies'], // Set available same as total for update
+                ':category' => $bookData['category'],
+                ':total_quantity' => $total_qty,
+                ':available_quantity' => $available_qty,
                 ':description' => $bookData['description'],
-                ':shelf_location' => $bookData['shelf_location'] ?? '',
-                ':book_id' => $bookId
+                ':shelf_location' => $bookData['shelf_location'],
+                ':id' => $bookId
             ];
 
-            // Add cover image parameter if provided
-            if (isset($bookData['book_cover'])) {
-                $params[':cover_image'] = $bookData['book_cover'];
-            }
-
-            // Execute with all parameters
-            $result = $stmt->execute($params);
-
-            if (!$result) {
-                $errorInfo = $stmt->errorInfo();
-                throw new Exception("Database Error: " . $errorInfo[2]);
-            }
-
-            return $result;
-        } catch (Exception $e) {
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
             error_log("Update Book Error: " . $e->getMessage());
-            return false;
+            throw new Exception("Error updating book: " . $e->getMessage());
         }
     }
-
     public function getBookById($bookId)
     {
         try {
