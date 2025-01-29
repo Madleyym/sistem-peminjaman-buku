@@ -159,44 +159,56 @@ class Book
     public function updateBook($bookId, $bookData)
     {
         try {
-            $sql = "UPDATE {$this->table_name} SET 
-                title = :title,
-                author = :author,
-                publisher = :publisher,
-                year_published = :year_published,
-                isbn = :isbn,
-                category = :category,
-                total_quantity = :total_quantity,
-                available_quantity = :available_quantity,
-                description = :description,
-                shelf_location = :shelf_location
-                WHERE id = :id";
+            // Start building SQL and parameters
+            $updateFields = [];
+            $params = [];
 
-            $stmt = $this->conn->prepare($sql);
-
-            // Convert numeric values
-            $total_qty = (int)$bookData['total_quantity'];
-            $available_qty = (int)$bookData['available_quantity'];
-            $year = (int)$bookData['year_published'];
-
-            $params = [
-                ':title' => $bookData['title'],
-                ':author' => $bookData['author'],
-                ':publisher' => $bookData['publisher'],
-                ':year_published' => $year,
-                ':isbn' => $bookData['isbn'],
-                ':category' => $bookData['category'],
-                ':total_quantity' => $total_qty,
-                ':available_quantity' => $available_qty,
-                ':description' => $bookData['description'],
-                ':shelf_location' => $bookData['shelf_location'],
-                ':id' => $bookId
+            // Map the fields
+            $fieldMappings = [
+                'title' => 'title',
+                'author' => 'author',
+                'publisher' => 'publisher',
+                'year_published' => 'year_published',
+                'isbn' => 'isbn',
+                'category' => 'category',
+                'total_quantity' => 'total_quantity',
+                'available_quantity' => 'available_quantity',
+                'description' => 'description',
+                'shelf_location' => 'shelf_location'
             ];
 
-            return $stmt->execute($params);
-        } catch (PDOException $e) {
+            // Add book_cover if it exists
+            if (!empty($bookData['book_cover'])) {
+                $fieldMappings['book_cover'] = 'cover_image';
+            }
+
+            foreach ($fieldMappings as $dataKey => $dbField) {
+                if (isset($bookData[$dataKey])) {
+                    $updateFields[] = "$dbField = :$dbField";
+                    $params[$dbField] = $bookData[$dataKey];
+                }
+            }
+
+            // Add book ID to parameters
+            $params['id'] = $bookId;
+
+            // Build the final SQL query
+            $sql = "UPDATE {$this->table_name} SET " .
+                implode(', ', $updateFields) .
+                " WHERE id = :id";
+
+            // Prepare and execute
+            $stmt = $this->conn->prepare($sql);
+            $result = $stmt->execute($params);
+
+            if (!$result) {
+                throw new Exception("Failed to update book");
+            }
+
+            return true;
+        } catch (Exception $e) {
             error_log("Update Book Error: " . $e->getMessage());
-            throw new Exception("Error updating book: " . $e->getMessage());
+            throw $e;
         }
     }
     public function getBookById($bookId)
@@ -263,43 +275,53 @@ class Book
 
     public function create($data)
     {
-        $query = "INSERT INTO {$this->table_name} 
-          (title, author, publisher, year_published, isbn, category, 
-           total_quantity, available_quantity, cover_image, description, 
-           shelf_location)
-          VALUES 
-          (:title, :author, :publisher, :year_published, :isbn, :category,
-           :total_quantity, :available_quantity, :cover_image, :description,
-           :shelf_location)";
-
-        $stmt = $this->conn->prepare($query);
-
-        // Sanitize input - Updated parameter names to match form
-        $sanitizedData = [
-            'title' => htmlspecialchars(trim($data['title'])),
-            'author' => htmlspecialchars(trim($data['author'])),
-            'publisher' => htmlspecialchars(trim($data['publisher'])),
-            'year_published' => intval($data['year_published']), // Changed from publication_year
-            'isbn' => trim($data['isbn']),
-            'category' => htmlspecialchars(trim($data['category'])),
-            'total_quantity' => intval($data['total_quantity']), // Changed from total_copies
-            'available_quantity' => intval($data['available_quantity']), // Changed to use available_quantity
-            'cover_image' => $data['cover_image'] ?? null, // Changed from book_cover
-            'description' => htmlspecialchars(trim($data['description'])),
-            'shelf_location' => htmlspecialchars(trim($data['shelf_location']))
-        ];
-
-        // Debug log
-        error_log("Sanitized Data: " . print_r($sanitizedData, true));
-
-        // Bind parameters
-        foreach ($sanitizedData as $key => &$value) {
-            $stmt->bindParam(":$key", $value);
-        }
-
         try {
-            return $stmt->execute();
-        } catch (PDOException $e) {
+            $this->conn->beginTransaction();
+
+            // Map book_cover to cover_image if exists
+            if (isset($data['book_cover'])) {
+                $data['cover_image'] = $data['book_cover'];
+            }
+
+            $query = "INSERT INTO {$this->table_name} 
+            (title, author, publisher, year_published, isbn, category, 
+             total_quantity, available_quantity, cover_image, description, 
+             shelf_location)
+            VALUES 
+            (:title, :author, :publisher, :year_published, :isbn, :category,
+             :total_quantity, :available_quantity, :cover_image, :description,
+             :shelf_location)";
+
+            $stmt = $this->conn->prepare($query);
+
+            // Sanitize input
+            $sanitizedData = [
+                'title' => htmlspecialchars(trim($data['title'])),
+                'author' => htmlspecialchars(trim($data['author'])),
+                'publisher' => htmlspecialchars(trim($data['publisher'])),
+                'year_published' => intval($data['year_published']),
+                'isbn' => trim($data['isbn']),
+                'category' => htmlspecialchars(trim($data['category'])),
+                'total_quantity' => intval($data['total_quantity']),
+                'available_quantity' => intval($data['available_quantity']),
+                'cover_image' => $data['cover_image'] ?? null,
+                'description' => htmlspecialchars(trim($data['description'])),
+                'shelf_location' => htmlspecialchars(trim($data['shelf_location']))
+            ];
+
+            // Debug log
+            error_log("Creating book with data: " . print_r($sanitizedData, true));
+
+            if (!$stmt->execute($sanitizedData)) {
+                throw new Exception("Failed to execute book creation query");
+            }
+
+            $this->conn->commit();
+            return $this->conn->lastInsertId();
+        } catch (Exception $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
             error_log("Create Book Error: " . $e->getMessage());
             throw new Exception("Failed to create book: " . $e->getMessage());
         }
