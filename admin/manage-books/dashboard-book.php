@@ -348,10 +348,11 @@ unset($_SESSION['message'], $_SESSION['error']);
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
+                                        <!-- In the table cell where book cover is displayed -->
                                         <img src="/sistem/uploads/book_covers/<?= htmlspecialchars($book['cover_image'] ?? 'default.jpg') ?>"
                                             alt="Cover Buku"
                                             class="h-16 w-12 object-cover rounded hidden md:block"
-                                            onerror="this.src='/sistem/uploads/book_covers/default.jpg'">
+                                            onerror="this.src='/sistem/uploads/book_covers/default.jpg'; this.onerror=null;">
                                         <div class="ml-0 md:ml-4">
                                             <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($book['title']) ?></div>
                                             <div class="text-sm text-gray-500 md:hidden">
