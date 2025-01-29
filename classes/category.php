@@ -2,7 +2,7 @@
 class Category
 {
     private $conn;
-    private $table_name = 'categories';
+    private $table_name = 'books';
 
     public function __construct($db)
     {
