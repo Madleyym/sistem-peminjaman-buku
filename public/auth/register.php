@@ -3,7 +3,7 @@ session_start();
 require_once '../../config/constants.php';
 require_once '../../config/database.php';
 require_once '../../classes/User.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
+// require_once __DIR__ . '/../../vendor/autoload.php';
 
 // Redirect to dashboard if already logged in
 
@@ -26,9 +26,9 @@ $result = null;
 // Proses registrasi
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Sanitasi input
-    $name = filter_var($_POST['name'] ?? '', FILTER_SANITIZE_STRING);
+    $name = filter_var($_POST['name'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
-    $phone_number = filter_var($_POST['phone_number'] ?? '', FILTER_SANITIZE_STRING);
+    $phone_number = filter_var($_POST['phone_number'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $address = filter_var($_POST['address'] ?? '', FILTER_SANITIZE_STRING);
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - <?= htmlspecialchars(SITE_NAME) ?></title>
+    <title>Daftar - <?= htmlspecialchars(SITE_NAME, ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/sistem/public/auth/auth-styles.css">
@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php if (!empty($errors)): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                     <?php foreach ($errors as $error): ?>
-                        <p><?= htmlspecialchars($error) ?></p>
+                        <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     id="name"
                     name="name"
                     required
-                    value="<?= htmlspecialchars($name) ?>"
+                    value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
             </div>
 
@@ -141,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     id="email"
                     name="email"
                     required
-                    value="<?= htmlspecialchars($email) ?>"
+                    value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
             </div>
 
@@ -162,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     id="address"
                     name="address"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"><?= htmlspecialchars($address) ?></textarea>
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"><?= htmlspecialchars($address, ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
 
             <div class="mb-4">

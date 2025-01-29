@@ -7,19 +7,9 @@ session_start(); // Start session for authentication check
 require_once($_SERVER['DOCUMENT_ROOT'] . '/sistem/config/constants.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/sistem/config/database.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/sistem/classes/book.php');
-require_once($_SERVER['DOCUMENT_ROOT'] . '/sistem/vendor/autoload.php');
-
 
 // Check if user is logged in
 $isLoggedIn = !empty($_SESSION['user_id']);
-
-if (!class_exists('Endroid\QrCode\QrCode')) {
-    die('Endroid QR Code class not found. Check Composer installation.');
-}
-
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
-use Endroid\QrCode\Color\Color;
 
 // Check if book ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -32,24 +22,6 @@ $book_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$book_id) {
     header('Location: books.php');
     exit();
-}
-
-try {
-    // Move QR code generation AFTER $book_id is validated
-    $bookQrUrl = SITE_URL . '/auth/users/book-loan.php?id=' . $book_id;
-
-    $qrCode = QrCode::create($bookQrUrl)
-        ->setSize(300)
-        ->setMargin(10)
-        ->setForegroundColor(new Color(0, 0, 0))
-        ->setBackgroundColor(new Color(255, 255, 255));
-
-    $writer = new PngWriter();
-    $result = $writer->write($qrCode);
-    $qrCodeDataUri = $result->getDataUri();
-} catch (Exception $e) {
-    error_log("QR Code Error: " . $e->getMessage());
-    $qrCodeDataUri = '';
 }
 
 try {
@@ -202,7 +174,7 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/public/auth/users/dashboard.php" class="text-white font-bold text-xl flex items-center">
+                    <a href="/sistem/public/auth/users/home.php" class="text-white font-bold text-xl flex items-center">
                         <i class="fas fa-book-open mr-2"></i>
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
@@ -249,9 +221,9 @@ try {
         </div>
     </nav>
 
-    <!-- C:\xampp\htdocs\sistem\public\books.php -->
+    <!-- Back to Books List -->
     <div class="container mx-auto px-4 mb-4 mt-6">
-        <a href="/sistem/public/auth/users/book-loan.php?id=<?= $book_id ?>" class="group flex items-center text-blue-600 hover:text-blue-800 transition-all duration-300 ease-in-out">
+        <a href="/sistem/public/auth/users/pinjaman-buku.php?id=<?= $book_id ?>" class="group flex items-center text-blue-600 hover:text-blue-800 transition-all duration-300 ease-in-out">
             <div class="mr-3 p-2 bg-blue-50 group-hover:bg-blue-100 rounded-full transition-all duration-300 ease-in-out">
                 <svg class="w-5 h-5 text-blue-600 group-hover:translate-x-[-4px] transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -281,73 +253,59 @@ try {
                             <?= htmlspecialchars($book['title']) ?>
                         </h1>
 
-                        <div class="grid md:grid-cols-3 gap-6">
-                            <!-- Book Details Column -->
-                            <div class="md:col-span-2 space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="flex items-center space-x-3">
-                                        <i class="fas fa-user text-blue-500"></i>
-                                        <div>
-                                            <h4 class="text-xs text-gray-500">Penulis</h4>
-                                            <p><?= htmlspecialchars($book['author']) ?></p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-3">
-                                        <i class="fas fa-building text-blue-500"></i>
-                                        <div>
-                                            <h4 class="text-xs text-gray-500">Penerbit</h4>
-                                            <p><?= htmlspecialchars($book['publisher']) ?></p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-3">
-                                        <i class="fas fa-calendar text-blue-500"></i>
-                                        <div>
-                                            <h4 class="text-xs text-gray-500">Tahun Terbit</h4>
-                                            <p><?= htmlspecialchars($book['year_published']) ?></p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-3">
-                                        <i class="fas fa-tags text-blue-500"></i>
-                                        <div>
-                                            <h4 class="text-xs text-gray-500">Kategori</h4>
-                                            <p><?= htmlspecialchars($book['category']) ?></p>
-                                        </div>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-user text-blue-500"></i>
+                                    <div>
+                                        <h4 class="text-xs text-gray-500">Penulis</h4>
+                                        <p><?= htmlspecialchars($book['author']) ?></p>
                                     </div>
                                 </div>
-
-                                <div class="grid grid-cols-2 gap-4 mt-4">
-                                    <div class="flex items-center space-x-3">
-                                        <i class="fas fa-book text-blue-500"></i>
-                                        <div>
-                                            <h4 class="text-xs text-gray-500">ISBN</h4>
-                                            <p><?= htmlspecialchars($book['isbn']) ?></p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-3">
-                                        <i class="fas fa-map-marker-alt text-blue-500"></i>
-                                        <div>
-                                            <h4 class="text-xs text-gray-500">Lokasi Rak</h4>
-                                            <p><?= htmlspecialchars($book['shelf_location']) ?></p>
-                                        </div>
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-building text-blue-500"></i>
+                                    <div>
+                                        <h4 class="text-xs text-gray-500">Penerbit</h4>
+                                        <p><?= htmlspecialchars($book['publisher']) ?></p>
                                     </div>
                                 </div>
-
-                                <div class="bg-blue-50 p-3 rounded-lg text-center mt-4">
-                                    <p class="text-blue-700 font-semibold">
-                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                                        Tersedia: <?= $book['available_quantity'] ?> buku
-                                    </p>
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-calendar text-blue-500"></i>
+                                    <div>
+                                        <h4 class="text-xs text-gray-500">Tahun Terbit</h4>
+                                        <p><?= htmlspecialchars($book['year_published']) ?></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-tags text-blue-500"></i>
+                                    <div>
+                                        <h4 class="text-xs text-gray-500">Kategori</h4>
+                                        <p><?= htmlspecialchars($book['category']) ?></p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- QR Code Column -->
-                            <div class="text-center">
-                                <h3 class="text-lg font-semibold mb-3">Scan untuk Pinjam Buku</h3>
-                                <img src="<?= $qrCodeDataUri ?>"
-                                    alt="QR Code Peminjaman Buku"
-                                    class="mx-auto w-48 h-48 object-contain rounded-lg shadow-md">
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Pindai QR Code dengan aplikasi perpustakaan
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-book text-blue-500"></i>
+                                    <div>
+                                        <h4 class="text-xs text-gray-500">ISBN</h4>
+                                        <p><?= htmlspecialchars($book['isbn']) ?></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-map-marker-alt text-blue-500"></i>
+                                    <div>
+                                        <h4 class="text-xs text-gray-500">Lokasi Rak</h4>
+                                        <p><?= htmlspecialchars($book['shelf_location']) ?></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 p-3 rounded-lg text-center mt-4">
+                                <p class="text-blue-700 font-semibold">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    Tersedia: <?= $book['available_quantity'] ?> buku
                                 </p>
                             </div>
                         </div>
@@ -355,7 +313,7 @@ try {
                         <!-- Login Required Section -->
                         <?php if (!$isLoggedIn): ?>
                             <div class="mt-6 bg-gray-100 rounded-lg p-6 text-center">
-                                <i class="fas fa-lock text-4xl text-red-500 mb-3"></i>
+                                <i class="fas fa-lock text-4xl text-red-500 mb-3
                                 <h2 class="text-xl font-bold mb-3">Login Required</h2>
                                 <p class="text-gray-600 mb-4">
                                     Silakan login terlebih dahulu untuk melihat detail buku.

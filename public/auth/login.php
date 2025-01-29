@@ -4,10 +4,10 @@ session_start();
 require_once '../../config/constants.php';
 require_once '../../config/database.php';
 require_once '../../classes/User.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
+// require_once __DIR__ . '/../../vendor/autoload.php';
 
 // Default redirect URL
-$redirect_url = '/sistem/public/auth/users/dashboard.php';
+$redirect_url = '/sistem/public/auth/users/home.php';
 
 // Check if there's a stored redirect URL from a previous session
 if (isset($_SESSION['redirect_after_login'])) {

@@ -4,7 +4,7 @@ require_once('../../../config/constants.php');
 require_once '../../../config/database.php';
 require_once '../../../classes/User.php';
 require_once '../../../classes/Book.php';
-require_once __DIR__ . '/../../../vendor/autoload.php';
+// require_once __DIR__ . '/../../../vendor/autoload.php';
 
 
 // Authentication check
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <nav x-data="{ mobileMenu: false }" class="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <a href="/sistem/public/auth/users/dashboard.php" class="text-white font-bold text-xl flex items-center">
+                <a href="/sistem/public/auth/users/home.php" class="text-white font-bold text-xl flex items-center">
                     <i class="fas fa-book-open mr-2"></i>
                     <?= htmlspecialchars(SITE_NAME) ?>
                 </a>
@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex space-x-4 items-center">
-                    <a href="/sistem/public/auth/users/book-loan.php" class="text-white hover:bg-blue-500 px-3 py-2 rounded-md">
+                    <a href="/sistem/public/auth/users/pinjaman-buku.php" class="text-white hover:bg-blue-500 px-3 py-2 rounded-md">
                         <i class="fas fa-book-reader mr-2"></i>Pinjam Buku
                     </a>
                     <a href="/sistem/public/auth/users/profile.php" class="text-white hover:bg-blue-500 px-3 py-2 rounded-md">
@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <!-- Mobile Menu -->
             <div x-show="mobileMenu" class="md:hidden">
                 <div class="px-2 pt-2 pb-3 space-y-1 bg-blue-700">
-                    <a href="/sistem/public/auth/users/book-loan.php" class="text-white block px-3 py-2 rounded-md hover:bg-blue-500">
+                    <a href="/sistem/public/auth/users/pinjaman-buku.php" class="text-white block px-3 py-2 rounded-md hover:bg-blue-500">
                         <i class="fas fa-book-reader mr-2"></i>Pinjam Buku
                     </a>
                     <a href="/sistem/public/auth/users/profile.php" class="text-white block px-3 py-2 rounded-md hover:bg-blue-500">

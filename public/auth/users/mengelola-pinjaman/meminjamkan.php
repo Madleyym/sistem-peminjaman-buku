@@ -9,11 +9,11 @@ error_reporting(E_ALL);
 // Log all errors to existing log file
 ini_set('error_log', 'C:\xampp\htdocs\sistem\logs\error.log');
 
-// // Correct require_once statements with absolute paths
+// Correct require_once statements with absolute paths
 // require_once __DIR__ . '/../../../../vendor/autoload.php';
-// require_once 'C:\xampp\htdocs\sistem\config\constants.php';
-// require_once 'C:\xampp\htdocs\sistem\config\database.php';
-// require_once 'C:\xampp\htdocs\sistem\classes\book.php';
+require_once __DIR__ . '/../../../../config/constants.php';
+require_once __DIR__ . '/../../../../config/database.php';
+require_once __DIR__ . '/../../../../classes/Book.php';
 
 try {
     // Authentication check
@@ -26,7 +26,7 @@ try {
     // Validate book ID
     $book_id = filter_input(INPUT_GET, 'book_id', FILTER_VALIDATE_INT);
     if (!$book_id) {
-        header('Location: ../books.php');
+        header('Location: ../daftar-buku.php');
         exit();
     }
 
@@ -34,7 +34,7 @@ try {
 } catch (Exception $e) {
     error_log("Loan Process Error: " . $e->getMessage());
     $_SESSION['error'] = 'Terjadi kesalahan sistem.';
-    header('Location: ../books.php');
+    header('Location: ../daftar-buku.php');
     exit();
 }
 

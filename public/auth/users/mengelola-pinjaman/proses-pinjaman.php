@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once dirname(__DIR__, 4) . '/vendor/autoload.php';
+// require_once dirname(__DIR__, 4) . '/vendor/autoload.php';
 require_once dirname(__DIR__, 4) . '/config/constants.php';
 require_once dirname(__DIR__, 4) . '/config/database.php';
 require_once dirname(__DIR__, 4) . '/classes/Book.php';
@@ -14,7 +14,7 @@ if (empty($_SESSION['user_id'])) {
 // Validate book ID
 $book_id = filter_input(INPUT_GET, 'book_id', FILTER_VALIDATE_INT);
 if (!$book_id) {
-    header('Location: books.php');
+    header('Location: daftar-buku.php');
     exit();
 }
 
@@ -28,7 +28,7 @@ try {
     // Check book availability
     if (!$book || $book['available_quantity'] <= 0) {
         $_SESSION['error'] = 'Buku tidak tersedia untuk dipinjam.';
-        header('Location: books.php');
+        header('Location: daftar-buku.php');
         exit();
     }
 

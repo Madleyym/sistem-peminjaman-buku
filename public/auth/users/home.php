@@ -14,7 +14,7 @@ require_once(__DIR__ . '/../../../config/constants.php');
 require_once(__DIR__ . '/../../../config/database.php');
 require_once(__DIR__ . '/../../../classes/User.php');
 require_once(__DIR__ . '/../../../classes/Book.php');
-require_once(__DIR__ . '/../../../vendor/autoload.php');
+// require_once(__DIR__ . '/../../../vendor/autoload.php');
 
 // Authentication check
 if (!isset($_SESSION['user_id'])) {
@@ -84,7 +84,7 @@ $utcTime = gmdate('Y-m-d H:i:s');
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <div class="flex-shrink-0">
-                    <a href="dashboard.php" class="flex items-center">
+                    <a href="home.php" class="flex items-center">
                         <i class="fas fa-book-open text-white text-2xl mr-2"></i>
                         <span class="text-white font-bold text-xl"><?= htmlspecialchars(SITE_NAME) ?></span>
                     </a>
@@ -92,7 +92,7 @@ $utcTime = gmdate('Y-m-d H:i:s');
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-4">
-                    <a href="book-loan.php" class="text-white hover:bg-blue-500 px-4 py-2 rounded-lg transition">
+                    <a href="/sistem/public/auth/users/pinjaman-buku.php" class="text-white hover:bg-blue-500 px-4 py-2 rounded-lg transition">
                         <i class="fas fa-book-reader mr-2"></i>Pinjam Buku
                     </a>
                     <a href="profile.php" class="text-white hover:bg-blue-500 px-4 py-2 rounded-lg transition">
@@ -101,7 +101,7 @@ $utcTime = gmdate('Y-m-d H:i:s');
                     <a href="../logout.php" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full transition">
                         <i class="fas fa-sign-out-alt mr-2"></i>Logout
                     </a>
-                </div>
+                </div>  
 
                 <!-- Mobile Menu Button -->
                 <div class="md:hidden">
@@ -261,7 +261,7 @@ $utcTime = gmdate('Y-m-d H:i:s');
                         <div class="text-center py-12">
                             <i class="fas fa-book-open text-gray-300 text-6xl mb-4"></i>
                             <p class="text-gray-500 mb-4">Anda belum meminjam buku apapun.</p>
-                            <a href="book-loan.php"
+                            <a href="pinjaman-buku.ph"
                                 class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
                                 <i class="fas fa-plus mr-2"></i>
                                 Pinjam Buku Sekarang
@@ -288,7 +288,7 @@ $utcTime = gmdate('Y-m-d H:i:s');
     <!-- Alpine.js Scripts -->
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('dashboard', () => ({
+            Alpine.data('home', () => ({
                 books: [],
                 filteredBooks: [],
                 searchQuery: '',
@@ -392,7 +392,7 @@ $utcTime = gmdate('Y-m-d H:i:s');
                     console.log('ServiceWorker registration failed: ', err);
                 });
             });
-            Alpine.data('dashboard', () => ({
+            Alpine.data('home', () => ({
                 currentTime: '',
 
                 init() {

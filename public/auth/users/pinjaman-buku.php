@@ -7,7 +7,7 @@ if (empty($_SESSION['user_id'])) {
     exit();
 }
 
-require_once __DIR__ . '/../../../vendor/autoload.php';
+// require_once __DIR__ . '/../../../vendor/autoload.php';
 require_once('../../../config/constants.php');
 require_once '../../../config/database.php';
 require_once '../../../classes/User.php';
@@ -218,11 +218,11 @@ $books = $keyword ?
                         <i x-show="mobileMenu" class="fas fa-times"></i>
                     </button>
                 </div>
-
-                <!-- Desktop Navigation -->
+ 
+                <!-- Desktop Navigation --> 
                 <div class="hidden md:flex space-x-4 items-center">
-                    <a href="/sistem/public/auth/users/book-loan.php" class="text-white hover:bg-blue-500 px-3 py-2 rounded-md">
-                        <i class="fas fa-book-reader mr-2"></i>Pinjam Buku
+                <a href="/sistem/public/auth/users/pinjaman-buku.php" class="text-white hover:bg-blue-500 px-4 py-2 rounded-lg transition">
+                <i class="fas fa-book-reader mr-2"></i>Pinjam Buku
                     </a>
                     <a href="/sistem/public/auth/users/profile.php" class="text-white hover:bg-blue-500 px-3 py-2 rounded-md">
                         <i class="fas fa-user-circle mr-2"></i>Profil
@@ -236,7 +236,7 @@ $books = $keyword ?
             <!-- Mobile Menu Dropdown -->
             <div x-show="mobileMenu" class="md:hidden">
                 <div class="px-2 pt-2 pb-3 space-y-1 bg-blue-600">
-                    <a href="/sistem/public/auth/users/book-loan.php" class="text-white block px-3 py-2 rounded-md hover:bg-blue-500">
+                    <a href="/sistem/public/auth/users/pinjaman buku.php" class="text-white block px-3 py-2 rounded-md hover:bg-blue-500">
                         <i class="fas fa-book-reader mr-2"></i>Pinjam Buku
                     </a>
                     <a href="/sistem/public/auth/users/profile.php" class="text-white block px-3 py-2 rounded-md hover:bg-blue-500">
@@ -261,7 +261,7 @@ $books = $keyword ?
         <section class="bg-white shadow-lg rounded-2xl p-8 mb-12">
             <h1 class="text-4xl font-bold text-center text-blue-700 mb-8">Pinjam Buku Perpustakaan</h1>
 
-            <form action="book-loan.php" method="GET" class="mb-12">
+            <form action="pinjaman-buku.php" method="GET" class="mb-12">
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <input
                         type="text"
@@ -314,8 +314,7 @@ $books = $keyword ?
                         </div>
                         <div class="flex-grow flex flex-col">
                             <h3 class="font-semibold text-lg text-gray-800 mb-1 line-clamp-2">
-                            <!-- C:\xampp\htdocs\sistem\public\auth\users\manage-loan\detail-books.php -->
-                                <a href="/sistem/public/auth/users/manage-loan/detail-books.php?id=<?= $book['id'] ?>" class="hover:text-blue-600 transition duration-300"> <?= htmlspecialchars($book['title']) ?>
+                                <a href="/sistem/public/auth/users/mengelola-pinjaman/detail-buku.php?id=<?= $book['id'] ?>" class="hover:text-blue-600 transition duration-300"> <?= htmlspecialchars($book['title']) ?>
                                 </a>
 
                             </h3>
@@ -335,7 +334,7 @@ $books = $keyword ?
                                     </svg>
                                     Tersedia: <?= $book['available_quantity'] ?>
                                 </div>
-                                <form action="book-loan.php" method="POST">
+                                <form action="pinjaman-buku.php" method="POST">
                                     <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
                                     <button
                                         type="submit"

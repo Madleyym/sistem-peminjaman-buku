@@ -4,7 +4,7 @@ require_once '../../config/constants.php';
 require_once '../../config/database.php';
 require_once '../../classes/Book.php';
 require_once '../../classes/Loan.php';
-require_once __DIR__ . '/../../../vendor/autoload.php';
+// require_once __DIR__ . '/../../../vendor/autoload.php';
 
 class LoanManager
 {

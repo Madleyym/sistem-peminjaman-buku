@@ -2,16 +2,13 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start(); // Add session start for consistent navigation
-// if (!isset($_SESSION['user_id'])) {
-//     $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-//     header('Location: /sistem/public/auth/login.php'); 
-// }
+session_start(); 
 
 require_once '../config/constants.php';
 require_once '../config/database.php';
 require_once '../classes/Book.php';
-require_once __DIR__ . '/../vendor/autoload.php';
+// Hapus atau comment baris ini
+// require_once __DIR__ . '/../vendor/autoload.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -248,7 +245,7 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/public/index.php" class="text-white font-bold text-xl">
+                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                 </div>
@@ -272,16 +269,13 @@ try {
         <!-- Mobile Menu -->
         <div x-show="open" class="md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-blue-600">
-                <a href="/" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
-                <a href="books.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
+                <a href="/sistem/beranda-pengguna.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
+                <a href="/sistem/public/daftar-buku.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
                 <?php if (empty($_SESSION['user_id'])): ?>
                     <a href="../../auth/login.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
                     <a href="../../auth/register.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Daftar</a>
-                <?php else: ?>
-                    <!-- <a href="/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Dashboard</a> -->
-                    <a href="/auth/logout.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Logout</a>
                 <?php endif; ?>
-                <a href="/contact" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
+                <a href="/kontak" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
             </div>
         </div>
     </nav>
@@ -291,13 +285,13 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/" class="text-white font-bold text-xl mr-8">
+                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl mr-8">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                     <div class="flex space-x-4">
-                        <a href="/sistem/public/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="/sistem/public/books.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
-                        <a href="/sistem/public/contact.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
+                        <a href="/sistem/beranda-pengguna.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
+                        <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
                     </div>
                 </div>
                 <div class="flex space-x-4">
@@ -305,8 +299,8 @@ try {
                         <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
                         <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
                     <?php else: ?>
-                        <!-- <a href="/sistem/public/dashboard.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a> -->
-                        <a href="/sistem/public/auth/logout.php" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium">Logout</a>
+                        <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -390,7 +384,7 @@ try {
                             </div>
 
                             <a
-                                href="/sistem/public/books-detail.php ?id=<?= $book['id'] ?>"
+                                href="/sistem/public/detail-buku.php?id=<?= $book['id'] ?>"
                                 class="w-full py-2.5 rounded-full text-sm font-semibold text-center bg-blue-500 text-white hover:bg-blue-600 transition duration-300 ease-in-out mt-3">
                                 Detail Buku
                             </a>
@@ -420,9 +414,9 @@ try {
             <div>
                 <h4 class="text-xl font-bold mb-4">Tautan Cepat</h4>
                 <ul class="space-y-2">
-                    <li><a href="/" class="text-gray-300 hover:text-white">Beranda</a></li>
-                    <li><a href="/books" class="text-gray-300 hover:text-white">Buku</a></li>
-                    <li><a href="/contact" class="text-gray-300 hover:text-white">Kontak</a></li>
+                    <li><a href="./sistem/beranda-pengguna.php" class="text-gray-300 hover:text-white">Beranda</a></li>
+                    <li><a href="/buku.php" class="text-gray-300 hover:text-white">Buku</a></li>
+                    <li><a href="/kirim-kontak.php" class="text-gray-300 hover:text-white">Kontak</a></li>
                 </ul>
             </div>
             <div>

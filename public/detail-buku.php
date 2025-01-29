@@ -3,8 +3,8 @@
 session_start();
 
 // Define constants
-define('LOGIN_PATH', '/sistem/public/auth/login.php');
-define('BOOKS_PATH', '/sistem/public/books.php');
+define('LOGIN_URL', '/sistem/public/auth/login.php');
+define('BOOKS_PATH', '/sistem/public/daftar-buku.php');
 define('REGISTER_PATH', '/sistem/public/auth/register.php');
 define('CURRENT_URL', $_SERVER['REQUEST_URI']);
 define('SITE_NAME', 'Sistem Perpustakaan');
@@ -140,21 +140,21 @@ try {
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="/sistem/public/index.php" class="text-white font-bold text-xl mr-8">
+                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl mr-8">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                     <!-- Desktop Navigation Links -->
                     <div class="hidden md:flex space-x-4">
-                        <a href="/sistem/public/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="/sistem/public/books.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
-                        <a href="/sistem/public/contact.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
+                        <a href="/sistem/beranda-pengguna.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
+                        <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
                     </div>
                 </div>
 
                 <!-- Authentication Links -->
                 <div class="hidden md:flex space-x-4">
                     <?php if (!$isLoggedIn): ?>
-                        <a href="<?= LOGIN_PATH ?>" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="<?= LOGIN_URL ?>" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
                         <a href="<?= REGISTER_PATH ?>" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
                     <?php else: ?>
                         <div class="flex items-center space-x-4">
@@ -197,11 +197,11 @@ try {
         <!-- Mobile Menu -->
         <div x-show="open" class="md:hidden bg-blue-600">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="/sistem/public/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
-                <a href="/sistem/public/books.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
-                <a href="/sistem/public/contact.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
+                <a href="/sistem/beranda-pengguna.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
+                <a href="/sistem/public/daftar-buku.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
+                <a href="/sistem/public/kontak.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
                 <?php if (!$isLoggedIn): ?>
-                    <a href="<?= LOGIN_PATH ?>" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
+                    <a href="<?= LOGIN_URL ?>" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
                     <a href="<?= REGISTER_PATH ?>" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Daftar</a>
                 <?php else: ?>
                     <div class="px-3 py-2 text-white">
@@ -230,7 +230,7 @@ try {
                     </div>
 
                     <div class="space-y-4">
-                        <a href="<?= LOGIN_PATH ?>?redirect=<?= urlencode(CURRENT_URL) ?>"
+                        <a href="<?= LOGIN_URL ?>?redirect=<?= urlencode(CURRENT_URL) ?>"
                             class="block w-full bg-blue-500 text-white py-3 rounded-lg text-center hover:bg-blue-600 
                                   transition-colors duration-200 font-medium">
                             <i class="fas fa-sign-in-alt mr-2"></i> Login
@@ -286,9 +286,9 @@ try {
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="/sistem/public/index.php" class="text-gray-400 hover:text-white transition-colors duration-200">Beranda</a></li>
-                        <li><a href="/sistem/public/books.php" class="text-gray-400 hover:text-white transition-colors duration-200">Katalog Buku</a></li>
-                        <li><a href="/sistem/public/contact.php" class="text-gray-400 hover:text-white transition-colors duration-200">Hubungi Kami</a></li>
+                        <li><a href="/sistem/beranda-pengguna.php" class="text-gray-400 hover:text-white transition-colors duration-200">Beranda</a></li>
+                        <li><a href="/sistem/public/daftar-buku.php" class="text-gray-400 hover:text-white transition-colors duration-200">Katalog Buku</a></li>
+                        <li><a href="/sistem/public/kontak.php" class="text-gray-400 hover:text-white transition-colors duration-200">Hubungi Kami</a></li>
                     </ul>
                 </div>
                 <div>
