@@ -41,17 +41,19 @@ try {
     // Initialize $newBooks to an empty array to avoid undefined variable errors in the HTML section
     $newBooks = [];
 }
+// require_once __DIR__ . '/includes/header.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <title><?= htmlspecialchars($pageTitle, ENT_QUOTES) ?></title>
     <title><?= htmlspecialchars($pageTitle) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="/sistem/includes/styles.css" rel="stylesheet">
 </head>
 <style>
     :root {
@@ -225,62 +227,6 @@ try {
         font-size: 0.9rem;
     }
 
-    /* Navigation */
-    .navbar {
-        background-color: var(--primary-color);
-        color: var(--white);
-        padding: 15px 0;
-    }
-
-    .navbar-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .navbar-links {
-        display: flex;
-        gap: 20px;
-    }
-
-    .navbar-links a {
-        color: var(--white);
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-
-    .navbar-links a:hover {
-        color: var(--secondary-color);
-    }
-
-    /* Footer */
-    .footer {
-        background-color: #2c3e50;
-        color: var(--white);
-        padding: 40px 0;
-    }
-
-    .footer-container {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 30px;
-    }
-
-    .footer-section h4 {
-        margin-bottom: 15px;
-        font-size: 1.2rem;
-    }
-
-    .footer-links a {
-        color: #bdc3c7;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-
-    .footer-links a:hover {
-        color: var(--white);
-    }
-
     /* Responsive Design */
     @media screen and (max-width: 768px) {
         .hero h1 {
@@ -294,15 +240,6 @@ try {
         .book-card-container {
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-        }
-
-        .footer-container {
-            grid-template-columns: 1fr;
-        }
-
-        .navbar-links {
-            display: none;
-            /* For mobile, you'll use JS/CSS to toggle */
         }
     }
 
@@ -322,81 +259,10 @@ try {
 </style>
 
 <body class="bg-gray-50 font-inter min-h-screen flex flex-col">
-    <!-- Mobile Navigation -->
-    <nav x-data="{ open: false }" class="bg-blue-700 md:hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/sistem/index.php" class="text-white font-bold text-xl">
-                        <?= htmlspecialchars(SITE_NAME) ?>
-                    </a>
-                </div>
-                <div class="-mr-2 flex md:hidden">
-                    <button
-                        @click="open = !open"
-                        type="button"
-                        class="bg-blue-600 inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-blue-500 focus:outline-none">
-                        <span class="sr-only">Open main menu</span>
-                        <svg x-show="!open" class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                        <svg x-show="open" class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
 
-        <!-- Mobile Menu -->
+    <?php include __DIR__ . '/includes/navigation.php'; ?>
 
-        <div x-show="open" class="md:hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-blue-600">
-                <a href="/sistem/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
-                <a href="/sistem/public/auth/users/book-loan.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
-                <?php if (empty($_SESSION['user_id'])): ?>
-                    <a href="../../auth/login.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
-                    <a href="../../auth/register.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Daftar</a>
-                <?php else: ?>
-                    <a href="/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Dashboard</a>
-                    <a href="/auth/logout.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Logout</a>
-                <?php endif; ?>
-                <a href="/contact" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Desktop Navigation (Copied from index.php) -->
-    <nav class="bg-blue-700 hidden md:block">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/sistem/index.php" class="text-white font-bold text-xl mr-8">
-                        <?= htmlspecialchars(SITE_NAME) ?>
-                    </a>
-                    <div class="flex space-x-4">
-                        <a href="/sistem/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
-                        <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
-                    </div>
-                </div>
-                <div class="flex space-x-4">
-                    <?php if (empty($_SESSION['user_id'])): ?>
-                        <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
-                        <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
-                    <?php else: ?>
-                        <a href="/sistem/public/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
-                        <a href="/sistem/public/auth/logout.php" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium">Logout</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
-        <!-- Your existing page content goes here -->
-        <!-- Hero Section -->
         <section class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl shadow-2xl overflow-hidden mb-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid md:grid-cols-2 gap-10 items-center">
                 <div class="space-y-6">
