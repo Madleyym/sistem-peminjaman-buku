@@ -276,35 +276,7 @@ try {
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 mt-auto">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-xl font-bold mb-4"><?= htmlspecialchars(SITE_NAME) ?></h3>
-                    <p class="text-gray-400">Sistem perpustakaan digital untuk memudahkan akses ke pengetahuan.</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="/sistem/index.php" class="text-gray-400 hover:text-white transition-colors duration-200">Beranda</a></li>
-                        <li><a href="/sistem/public/daftar-buku.php" class="text-gray-400 hover:text-white transition-colors duration-200">Katalog Buku</a></li>
-                        <li><a href="/sistem/public/kontak.php" class="text-gray-400 hover:text-white transition-colors duration-200">Hubungi Kami</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Contact Info</h3>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><i class="fas fa-envelope mr-2"></i> perpustakaan@example.com</li>
-                        <li><i class="fas fa-phone mr-2"></i> (021) 1234-5678</li>
-                        <li><i class="fas fa-map-marker-alt mr-2"></i> Jl. Perpustakaan No. 123</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
-                <p class="text-gray-400">&copy; <?= date('Y') ?> <?= htmlspecialchars(SITE_NAME) ?>. All Rights Reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <?php include '../includes/footer.php'; ?>
 </body>
 
 </html>
