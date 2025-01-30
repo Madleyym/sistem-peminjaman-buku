@@ -14,6 +14,15 @@ if (!defined('SITE_NAME')) {
     die('Site configuration error: SITE_NAME is not defined.');
 }
 
+// Pastikan direktori upload ada
+$uploadDir = __DIR__ . "/uploads/book_covers/";
+if (!file_exists($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
+}
+
+// Default book cover path
+$defaultBookCover = '/sistem/uploads/books/book-default.png';
+
 try {
     // Database connection
     $database = new Database();
@@ -422,21 +431,16 @@ try {
                     <?php foreach ($newBooks as $book): ?>
                         <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-2 transition duration-300 p-4 flex flex-col">
                             <div class="relative mb-4">
-                                <img
-                                    src="<?php
-                                            if (!empty($book['cover_image'])) {
-                                                echo UPLOAD_URL . '/' . htmlspecialchars($book['cover_image']);
-                                            } else {
-                                                echo BASE_URL . '/assets/images/default-book-cover.jpg';
-                                            }
-                                            ?>"
+                                <img src="<?= !empty($book['cover_image'])
+                                                ? '/sistem/uploads/book_covers/' . htmlspecialchars($book['cover_image'])
+                                                : $defaultBookCover ?>"
                                     alt="<?= htmlspecialchars($book['title']) ?>"
-                                    class="w-full h-64 object-cover rounded-xl">
+                                    class="w-full h-64 object-cover rounded-xl"
+                                    onerror="this.src='<?= $defaultBookCover ?>'">
                                 <span class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                                     Baru
                                 </span>
                             </div>
-
 
                             <div class="flex-grow flex flex-col">
                                 <h3 class="font-semibold text-lg text-gray-800 mb-1 line-clamp-2 h-12">
@@ -450,10 +454,11 @@ try {
                                 </div>
                             </div>
 
-                            <a
-                                href="#"
+                            <a href="#"
                                 onclick="checkLoginStatus(<?= $book['id'] ?>); return false;"
-                                class="w-full py-2.5 rounded-full text-sm font-semibold text-center bg-blue-500 text-white hover:bg-blue-600 transition duration-300 ease-in-out mt-3">
+                                class="w-full py-2.5 rounded-full text-sm font-semibold text-center 
+                          bg-blue-500 text-white hover:bg-blue-600 
+                          transition duration-300 ease-in-out mt-3">
                                 Detail
                             </a>
                         </div>
@@ -466,13 +471,12 @@ try {
             </div>
         </section>
     </main>
-
-    <!-- Footer -->
     <?php include './includes/footer.php'; ?>
-
-
 </body>
 <script>
+    // Default image path
+    const DEFAULT_BOOK_COVER = '/sistem/uploads/books/book-default.png';
+
     // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
@@ -483,25 +487,34 @@ try {
         });
     });
 
-    // Login status check with loading state
+    // Enhanced Login status check with loading state
     function checkLoginStatus(bookId) {
         const button = event.currentTarget;
-        button.classList.add('loading');
+
+        // Add loading state with spinner
+        button.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Loading...
+        `;
+        button.disabled = true;
+        button.classList.add('opacity-75', 'cursor-not-allowed');
 
         <?php if (empty($_SESSION['user_id'])): ?>
             setTimeout(() => {
-                button.classList.remove('loading');
-                window.location.href = '/sistem/public/auth/login.php?redirect=' + encodeURIComponent(window.location.pathname + '?book=' + bookId);
+                window.location.href = '/sistem/public/auth/login.php?redirect=' +
+                    encodeURIComponent(window.location.pathname + '?book=' + bookId);
             }, 500);
         <?php else: ?>
             setTimeout(() => {
-                button.classList.remove('loading');
-                window.location.href = 'detail-buku.php?id=' + bookId;
+                window.location.href = '/sistem/public/detail-buku.php?id=' + bookId;
             }, 500);
         <?php endif; ?>
     }
 
-    // Intersection Observer for lazy loading images
+    // Enhanced lazy loading for images with fallback
     document.addEventListener('DOMContentLoaded', function() {
         const images = document.querySelectorAll('img[data-src]');
         const imageObserver = new IntersectionObserver((entries, observer) => {
@@ -509,6 +522,10 @@ try {
                 if (entry.isIntersecting) {
                     const img = entry.target;
                     img.src = img.dataset.src;
+                    img.onerror = function() {
+                        this.src = DEFAULT_BOOK_COVER;
+                        this.onerror = null;
+                    }
                     img.removeAttribute('data-src');
                     observer.unobserve(img);
                 }
@@ -517,6 +534,13 @@ try {
 
         images.forEach(img => imageObserver.observe(img));
     });
+
+    // Handle image errors globally
+    document.addEventListener('error', function(e) {
+        if (e.target.tagName.toLowerCase() === 'img') {
+            e.target.src = DEFAULT_BOOK_COVER;
+        }
+    }, true);
 </script>
 
 </html>
