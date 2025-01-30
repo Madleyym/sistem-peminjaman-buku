@@ -203,7 +203,7 @@ $books = $keyword ?
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/public/auth/users/dashboard.php" class="text-white font-bold text-xl flex items-center">
+                    <a href="/sistem/public/auth/users/home.php" class="text-white font-bold text-xl flex items-center">
                         <i class="fas fa-book-open mr-2"></i>
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
