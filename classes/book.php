@@ -9,87 +9,87 @@ class Book
         $this->conn = $db;
     }
 
-    public function getCategory()
-    {
-        try {
-            // Debug the query
-            error_log("Executing category query");
-
-            $query = "SELECT DISTINCT category FROM {$this->table_name} WHERE category IS NOT NULL ORDER BY category";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute();
-
-            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            error_log("Categories found: " . print_r($results, true));
-
-            return $results;
-        } catch (PDOException $e) {
-            error_log("Error getting categories: " . $e->getMessage());
-            return [];
-        }
-    }
-    public function getAllBooks($limit = 10, $offset = 0, $searchQuery = '', $categoryFilter = '')
+    public function getAllBooks($limit = 10, $offset = 0, $searchQuery = '', $categoryFilter = '', $minYear = '', $maxYear = '')
     {
         // Removed join with categories table since it doesn't exist
         $query = "SELECT * FROM {$this->table_name} WHERE 1=1";
+        $params = [];
 
         if (!empty($searchQuery)) {
             $query .= " AND (title LIKE :search OR author LIKE :search OR isbn LIKE :search)";
+            $params[':search'] = "%{$searchQuery}%";
         }
 
         if (!empty($categoryFilter)) {
             $query .= " AND category = :category";
+            $params[':category'] = $categoryFilter;
+        }
+
+        if (!empty($minYear)) {
+            $query .= " AND year_published >= :min_year";
+            $params[':min_year'] = $minYear;
+        }
+
+        if (!empty($maxYear)) {
+            $query .= " AND year_published <= :max_year";
+            $params[':max_year'] = $maxYear;
         }
 
         $query .= " ORDER BY id DESC LIMIT :limit OFFSET :offset";
+        $params[':limit'] = $limit;
+        $params[':offset'] = $offset;
 
         $stmt = $this->conn->prepare($query);
 
-        if (!empty($searchQuery)) {
-            $searchParam = "%{$searchQuery}%";
-            $stmt->bindParam(':search', $searchParam);
+        foreach ($params as $key => $value) {
+            if (in_array($key, [':limit', ':offset'])) {
+                $stmt->bindValue($key, $value, PDO::PARAM_INT);
+            } else {
+                $stmt->bindValue($key, $value);
+            }
         }
-
-        if (!empty($categoryFilter)) {
-            $stmt->bindParam(':category', $categoryFilter);
-        }
-
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function countTotalBooks($searchQuery = '', $categoryFilter = '')
+
+    public function countTotalBooks($searchQuery = '', $categoryFilter = '', $minYear = '', $maxYear = '')
     {
         // Query untuk menghitung total buku dengan kategori dari tabel books
         $query = "SELECT COUNT(*) as total FROM {$this->table_name} WHERE 1=1";
+        $params = [];
 
         // Filter pencarian
         if (!empty($searchQuery)) {
             $query .= " AND (title LIKE :search OR author LIKE :search OR isbn LIKE :search)";
+            $params[':search'] = "%{$searchQuery}%";
         }
 
         // Filter berdasarkan kategori dari kolom category
         if (!empty($categoryFilter)) {
             $query .= " AND category = :category";
+            $params[':category'] = $categoryFilter;
+        }
+
+        if (!empty($minYear)) {
+            $query .= " AND year_published >= :min_year";
+            $params[':min_year'] = $minYear;
+        }
+
+        if (!empty($maxYear)) {
+            $query .= " AND year_published <= :max_year";
+            $params[':max_year'] = $maxYear;
         }
 
         $stmt = $this->conn->prepare($query);
 
-        // Binding parameter
-        if (!empty($searchQuery)) {
-            $searchParam = "%{$searchQuery}%";
-            $stmt->bindParam(':search', $searchParam);
-        }
-
-        if (!empty($categoryFilter)) {
-            $stmt->bindParam(':category', $categoryFilter);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
         }
 
         $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row['total'];
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)$result['total'];
     }
 
     public function addBook($bookData)
@@ -275,55 +275,74 @@ class Book
 
     public function create($data)
     {
-        try {
-            $this->conn->beginTransaction();
-
-            // Map book_cover to cover_image if exists
-            if (isset($data['book_cover'])) {
-                $data['cover_image'] = $data['book_cover'];
+        // Validate required fields
+        $required_fields = ['title', 'author', 'isbn'];
+        foreach ($required_fields as $field) {
+            if (!isset($data[$field]) || empty(trim($data[$field]))) {
+                throw new Exception("Kolom {$field} wajib diisi");
             }
+        }
 
-            $query = "INSERT INTO {$this->table_name} 
-            (title, author, publisher, year_published, isbn, category, 
-             total_quantity, available_quantity, cover_image, description, 
-             shelf_location)
-            VALUES 
-            (:title, :author, :publisher, :year_published, :isbn, :category,
-             :total_quantity, :available_quantity, :cover_image, :description,
-             :shelf_location)";
+        // Check for duplicate ISBN
+        $checkIsbn = "SELECT COUNT(*) FROM {$this->table_name} WHERE isbn = :isbn";
+        $stmtCheck = $this->conn->prepare($checkIsbn);
+        $stmtCheck->bindParam(':isbn', $data['isbn']);
+        $stmtCheck->execute();
 
+        if ($stmtCheck->fetchColumn() > 0) {
+            throw new Exception("ISBN {$data['isbn']} sudah terdaftar dalam sistem. Mohon gunakan ISBN yang berbeda.");
+        }
+
+        // Set default values for optional fields
+        $defaults = [
+            'publisher' => '',
+            'category' => 1, // Default category ID
+            'year_published' => date('Y'), // Current year
+            'total_quantity' => 1,
+            'available_quantity' => 1,
+            'description' => '',
+            'shelf_location' => ''
+        ];
+
+        // Merge provided data with defaults
+        $data = array_merge($defaults, $data);
+
+        $query = "INSERT INTO {$this->table_name} 
+              (title, author, publisher, isbn, category, 
+               year_published, total_quantity, available_quantity, 
+               description, shelf_location)
+              VALUES (:title, :author, :publisher, :isbn, :category, 
+                      :year, :total, :available, :description, 
+                      :shelf)";
+
+        try {
             $stmt = $this->conn->prepare($query);
 
-            // Sanitize input
-            $sanitizedData = [
-                'title' => htmlspecialchars(trim($data['title'])),
-                'author' => htmlspecialchars(trim($data['author'])),
-                'publisher' => htmlspecialchars(trim($data['publisher'])),
-                'year_published' => intval($data['year_published']),
-                'isbn' => trim($data['isbn']),
-                'category' => htmlspecialchars(trim($data['category'])),
-                'total_quantity' => intval($data['total_quantity']),
-                'available_quantity' => intval($data['available_quantity']),
-                'cover_image' => $data['cover_image'] ?? null,
-                'description' => htmlspecialchars(trim($data['description'])),
-                'shelf_location' => htmlspecialchars(trim($data['shelf_location']))
-            ];
+            // Sanitize and validate input
+            $sanitized_data = $this->sanitizeBookData($data);
 
-            // Debug log
-            error_log("Creating book with data: " . print_r($sanitizedData, true));
+            $stmt->bindParam(':title', $sanitized_data['title']);
+            $stmt->bindParam(':author', $sanitized_data['author']);
+            $stmt->bindParam(':publisher', $sanitized_data['publisher']);
+            $stmt->bindParam(':isbn', $sanitized_data['isbn']);
+            $stmt->bindParam(':category', $sanitized_data['category']);
+            $stmt->bindParam(':year_published', $sanitized_data['year_published']);
+            $stmt->bindParam(':total_quantity', $sanitized_data['total_quantity']);
+            $stmt->bindParam(':available_quantity', $sanitized_data['available_quantity']);
+            $stmt->bindParam(':description', $sanitized_data['description']);
+            $stmt->bindParam(':shelf_location', $sanitized_data['shelf_location']);
 
-            if (!$stmt->execute($sanitizedData)) {
-                throw new Exception("Failed to execute book creation query");
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                throw new Exception("Gagal menambahkan buku ke database");
             }
-
-            $this->conn->commit();
-            return $this->conn->lastInsertId();
-        } catch (Exception $e) {
-            if ($this->conn->inTransaction()) {
-                $this->conn->rollBack();
-            }
+        } catch (PDOException $e) {
             error_log("Create Book Error: " . $e->getMessage());
-            throw new Exception("Failed to create book: " . $e->getMessage());
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                throw new Exception("ISBN sudah terdaftar dalam sistem. Mohon gunakan ISBN yang berbeda.");
+            }
+            throw new Exception("Gagal menambahkan buku: " . $e->getMessage());
         }
     }
 
@@ -367,9 +386,6 @@ class Book
         if (!empty($filters['max_year'])) {
             $query .= " AND year_published <= :max_year";
         }
-        if (!empty($filters['language'])) {
-            $query .= " AND language = :language";
-        }
 
         $stmt = $this->conn->prepare($query);
         $keyword = "%{$keyword}%";
@@ -383,9 +399,6 @@ class Book
         }
         if (!empty($filters['max_year'])) {
             $stmt->bindParam(':max_year', $filters['max_year']);
-        }
-        if (!empty($filters['language'])) {
-            $stmt->bindParam(':language', $filters['language']);
         }
 
         $stmt->execute();
@@ -405,7 +418,7 @@ class Book
             'available_quantity' => intval($data['total_copies'] ?? 0),  // Set sama dengan total_copies
             'description' => htmlspecialchars(trim($data['description'])),
             'shelf_location' => htmlspecialchars(trim($data['shelf_location'])),
-            'language' => htmlspecialchars(trim($data['language'] ?? '')) // Tambah default empty string
+            // 'language' => htmlspecialchars(trim($data['language']))
         ];
     }
     // Tambahkan method ini di akhir class Book, sebelum curly brace penutup }

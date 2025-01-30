@@ -11,6 +11,14 @@ $rootPath = realpath(dirname(__DIR__, 2));
 require_once $rootPath . '/config/constants.php';
 require_once $rootPath . '/config/database.php';
 require_once $rootPath . '/classes/Book.php';
+require_once $rootPath . '/classes/Category.php';
+
+// Pastikan direktori upload ada
+$uploadDir = __DIR__ . "/../../uploads/book_covers/";
+if (!file_exists($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
+}
+
 
 // Inisialisasi objek
 $database = new Database();
@@ -127,7 +135,6 @@ $books = $bookManager->getAllBooks($limit, $offset, $searchQuery, $categoryFilte
 $totalBooks = $bookManager->countTotalBooks($searchQuery, $categoryFilter);
 $totalPages = ceil($totalBooks / $limit);
 
-// Messages
 $message = $_SESSION['message'] ?? '';
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['message'], $_SESSION['error']);
@@ -182,28 +189,227 @@ unset($_SESSION['message'], $_SESSION['error']);
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Enhanced Table Styles */
+        .book-table-container {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .book-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .book-table th {
+            padding: 1.5rem;
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            color: white;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .book-table tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.2s;
+        }
+
+        .book-table tr:hover {
+            background-color: #eff6ff;
+        }
+
+        /* Enhanced Card Styles */
         .book-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: slideInUp 0.3s ease-out;
         }
 
         .book-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
         }
 
-        @media (max-width: 768px) {
-            .responsive-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .mobile-stack>* {
-                margin-bottom: 1rem;
-            }
+        /* Enhanced Button Styles */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            color: white;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease-in-out;
         }
 
+        .btn-primary:hover {
+            background: linear-gradient(to right, #1d4ed8, #1e40af);
+        }
+
+        .btn-primary:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #f3f4f6;
+            color: #374151;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Modal Styles */
         .modal-backdrop {
+            position: fixed;
+            inset: 0;
             background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(1);
+            transition: all 0.3s ease-out;
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        /* Form Styles */
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .form-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: white;
+            transition: all 0.15s ease-in-out;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+            height: 1.25rem;
+            width: 1.25rem;
+            color: white;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 640px) {
+            .responsive-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .mobile-stack {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+            max-width: 28rem;
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-success {
+            background-color: #22c55e;
+            color: white;
+        }
+
+        .notification-error {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        /* Tambahkan di bagian style */
+        .book-cover-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .book-cover-preview-container {
+            aspect-ratio: 2/3;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -222,7 +428,6 @@ unset($_SESSION['message'], $_SESSION['error']);
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
                 <!-- Navigation Links -->
                 <div class="hidden md:block">
                     <div class="flex items-center space-x-4">
@@ -290,7 +495,22 @@ unset($_SESSION['message'], $_SESSION['error']);
             </div>
         </div>
     </nav>
-
+    <!-- Notification Component -->
+    <?php if ($message || $error): ?>
+        <div class="fixed top-4 right-4 z-50 notification">
+            <div class="<?= $error ? 'bg-red-500' : 'bg-green-500' ?> text-white px-6 py-4 rounded-lg shadow-lg">
+                <div class="flex items-center">
+                    <i class="fas <?= $error ? 'fa-exclamation-circle' : 'fa-check-circle' ?> mr-2"></i>
+                    <p><?= htmlspecialchars($error ?: $message) ?></p>
+                </div>
+            </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.notification')?.remove();
+            }, 5000);
+        </script>
+    <?php endif; ?>
     <!-- START: MAIN CONTENT -->
     <main x-data="bookManager" class="container mx-auto px-4 py-8">
         <div class="space-y-6">
@@ -308,6 +528,7 @@ unset($_SESSION['message'], $_SESSION['error']);
             </div>
 
             <!-- Search and Filter Section -->
+            <!-- Search and Filter Section -->
             <div class="bg-white shadow rounded-lg p-4 md:p-6">
                 <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <input
@@ -316,21 +537,39 @@ unset($_SESSION['message'], $_SESSION['error']);
                         placeholder="Cari buku..."
                         value="<?= htmlspecialchars($searchQuery) ?>"
                         class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <select name="category" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Semua Kategori</option>
-                        <?php foreach ($categories as $cat): ?>
-                            <option value="<?= htmlspecialchars($cat['category']) ?>"
-                                <?= $categoryFilter == $cat['category'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($cat['category']) ?>
-                            </option>
-                        <?php endforeach; ?>
+                    <select
+                        name="category"
+                        class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Pilih Kategori</option>
+                        <?php
+                        $stmt = $conn->prepare("SELECT DISTINCT category FROM books WHERE category IS NOT NULL AND category != '' ORDER BY category");
+                        $stmt->execute();
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            $selected = ($categoryFilter == $row['category']) ? 'selected' : '';
+                            echo "<option value='" . htmlspecialchars($row['category']) . "' $selected>" .
+                                htmlspecialchars($row['category']) . "</option>";
+                        }
+                        ?>
                     </select>
-                    <button type="submit"
-                        class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-150 ease-in-out">
-                        Cari
-                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button type="submit"
+                            class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-150 ease-in-out">
+                            Cari
+                        </button>
+                        <button type="button" id="resetButton"
+                            class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-150 ease-in-out">
+                            Reset
+                        </button>
+                    </div>
                 </form>
             </div>
+
+            <!-- JavaScript untuk Tombol Reset -->
+            <script>
+                document.getElementById('resetButton').addEventListener('click', function() {
+                    window.location.href = window.location.pathname;
+                });
+            </script>
 
             <!-- Books List -->
             <div class="bg-white shadow rounded-lg overflow-hidden overflow-x-auto">
@@ -349,11 +588,10 @@ unset($_SESSION['message'], $_SESSION['error']);
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        <!-- In the table cell where book cover is displayed -->
-                                        <img src="/sistem/uploads/book_covers/<?= htmlspecialchars($book['cover_image'] ?? 'default.jpg') ?>"
+                                        <img src="<?= $book['cover_image'] ? '/sistem/uploads/book_covers/' . htmlspecialchars($book['cover_image']) : '/sistem/uploads/books/book-default.png' ?>"
                                             alt="Cover Buku"
                                             class="h-16 w-12 object-cover rounded hidden md:block"
-                                            onerror="this.src='/sistem/uploads/book_covers/default.jpg'; this.onerror=null;">
+                                            onerror="this.src='/sistem/uploads/books/book-default.png'">
                                         <div class="ml-0 md:ml-4">
                                             <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($book['title']) ?></div>
                                             <div class="text-sm text-gray-500 md:hidden">
@@ -401,7 +639,36 @@ unset($_SESSION['message'], $_SESSION['error']);
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                <!-- Pagination -->
+                <div class="mt-6 flex justify-center">
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <!-- Previous Page -->
+                        <?php if ($page > 1): ?>
+                            <a href="?page=<?= $page - 1 ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?><?= $categoryFilter ? '&category=' . urlencode($categoryFilter) : '' ?>"
+                                class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Previous
+                            </a>
+                        <?php endif; ?>
+
+                        <!-- Page Numbers -->
+                        <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
+                            <a href="?page=<?= $i ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?><?= $categoryFilter ? '&category=' . urlencode($categoryFilter) : '' ?>"
+                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 <?= $i === $page ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-700' ?> text-sm font-medium hover:bg-gray-50">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+
+                        <!-- Next Page -->
+                        <?php if ($page < $totalPages): ?>
+                            <a href="?page=<?= $page + 1 ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?><?= $categoryFilter ? '&category=' . urlencode($categoryFilter) : '' ?>"
+                                class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Next
+                            </a>
+                        <?php endif; ?>
+                    </nav>
+                </div>
             </div>
+
 
             <!-- Modal -->
             <div x-show="isModalOpen" x-cloak class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -457,8 +724,20 @@ unset($_SESSION['message'], $_SESSION['error']);
 
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Kategori <span class="text-red-500">*</span></label>
-                                    <input type="text" name="category" x-model="editingBook.category" required
-                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <select
+                                        name="category"
+                                        class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Semua Kategori</option>
+                                        <?php
+                                        $stmt = $conn->prepare("SELECT DISTINCT category FROM books WHERE category IS NOT NULL AND category != '' ORDER BY category");
+                                        $stmt->execute();
+                                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                            $selected = (isset($_GET['category']) && $_GET['category'] == $row['category']) ? 'selected' : '';
+                                            echo "<option value='" . htmlspecialchars($row['category']) . "' {$selected}>" .
+                                                htmlspecialchars($row['category']) . "</option>";
+                                        }
+                                        ?>
+                                    </select>
                                 </div>
 
                                 <!-- Quantity Information -->
@@ -483,35 +762,39 @@ unset($_SESSION['message'], $_SESSION['error']);
                                 </div>
                             </div>
 
-                            <!-- Full Width Fields -->
-                            <div class="mt-6">
-                                <label class="block text-sm font-medium mb-2">Deskripsi Buku</label>
-                                <textarea name="description" x-model="editingBook.description" rows="4"
-                                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Masukkan deskripsi buku..."></textarea>
-                            </div>
-
-                            <div class="mt-6">
-                                <label class="block text-sm font-medium mb-2">Sampul Buku</label>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-24">
-                                        <img
-                                            id="coverPreview"
-                                            :src="editingBook.cover_image ? '/sistem/uploads/book_covers/' + editingBook.cover_image : '#'"
-                                            alt="Preview"
-                                            class="w-full h-32 object-cover rounded"
-                                            style="display: none;">
-                                    </div>
-                                    <div class="flex-1">
-                                        <input
-                                            type="file"
-                                            name="cover_image"
-                                            accept="image/*"
-                                            @change="previewImage"
-                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                                        <p class="text-sm text-gray-500 mt-1">
-                                            Format yang didukung: JPG, JPEG, PNG. Maksimal 5MB.
-                                        </p>
+                                <!-- Fields yang mengambil full width -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium mb-2">Deskripsi Buku</label>
+                                    <textarea name="description"
+                                        x-model="editingBook.description"
+                                        rows="4"
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Masukkan deskripsi buku..."></textarea>
+                                </div>
+                                <!-- Ganti bagian preview image pada modal -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium mb-2">Sampul Buku</label>
+                                    <div class="flex items-center space-x-4">
+                                        <!-- Preview gambar dengan x-cloak untuk mencegah flicker -->
+                                        <div x-cloak x-show="editingBook.cover_image || editingBook.cover_image_preview"
+                                            class="w-24 h-32 border rounded overflow-hidden">
+                                            <img :src="getImageSource()"
+                                                alt="Preview"
+                                                class="w-full h-full object-cover"
+                                                @error="handleImageError"
+                                                x-ref="previewImage">
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="file"
+                                                name="cover_image"
+                                                accept="image/*"
+                                                @change="handleImagePreview"
+                                                x-ref="fileInput"
+                                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                Format yang didukung: JPG, JPEG, PNG. Maksimal 5MB.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -528,89 +811,232 @@ unset($_SESSION['message'], $_SESSION['error']);
                 </div>
             </div>
 
-            <!-- Alpine.js Script -->
-            <script>
-                document.addEventListener('alpine:init', () => {
-                    Alpine.data('bookManager', () => ({
-                        isModalOpen: false,
-                        editingBook: {
-                            id: null,
-                            title: '', // judul
-                            author: '', // penulis
-                            publisher: '', // penerbit
-                            year_published: '', // tahun terbit
-                            isbn: '', // nomor ISBN
-                            category: '', // kategori
-                            total_quantity: '', // jumlah total
-                            available_quantity: '', // jumlah tersedia
-                            description: '', // deskripsi
-                            shelf_location: '', // lokasi rak
-                            cover_image: '' // sampul buku
-                        },
-                        previewImage(event) {
-                            const file = event.target.files[0];
-                            if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    const preview = document.getElementById('coverPreview');
-                                    preview.src = e.target.result;
-                                    preview.style.display = 'block';
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        },
-                        openAddModal() {
-                            this.editingBook = {
-                                id: null,
-                                title: '',
-                                author: '',
-                                publisher: '',
-                                year_published: '',
-                                isbn: '',
-                                category: '',
-                                total_quantity: '',
-                                available_quantity: '',
-                                shelf_location: '',
-                                description: '',
-                            };
-                            this.isModalOpen = true;
-                        },
+    <!-- Alpine.js Script -->
+    <script>
+        document.getElementById('resetButton').addEventListener('click', function() {
+            window.location.href = window.location.pathname;
+        });
 
-                        openEditModal(book) {
-                            this.editingBook = {
-                                ...book
-                            };
-                            this.isModalOpen = true;
-                        },
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('bookManager', () => ({
+                isModalOpen: false,
+                isLoading: false,
+                defaultImagePath: '/sistem/uploads/books/book-default.png', // Path default image
+                notification: {
+                    show: false,
+                    message: '',
+                    type: 'success',
+                    timeout: null
+                },
+                editingBook: {
+                    id: null,
+                    title: '',
+                    author: '',
+                    publisher: '',
+                    year_published: '',
+                    isbn: '',
+                    category: '',
+                    total_quantity: '',
+                    available_quantity: '',
+                    shelf_location: '',
+                    description: '',
+                    cover_image: '',
+                    cover_image_preview: null,
+                    created_at: '', // Tambahkan timestamp
+                    updated_by: 'Madleyym' // Tambahkan user yang update
+                },
 
-                        confirmDelete(id) {
-                            if (confirm('Apakah Anda yakin ingin menghapus buku ini?')) {
-                                window.location.href = `?action=delete&id=${id}`;
-                            }
-                        },
+                showNotification(message, type = 'success') {
+                    if (this.notification.timeout) {
+                        clearTimeout(this.notification.timeout);
+                    }
 
-                        // Update the submitForm function in Alpine.js
-                        submitForm(e) {
-                            const form = e.target;
-                            const formData = new FormData(form);
+                    this.notification = {
+                        show: true,
+                        message,
+                        type,
+                        timeout: setTimeout(() => {
+                            this.notification.show = false;
+                        }, 3000)
+                    };
+                },
 
-                            // Ensure these fields are included
-                            formData.append('total_quantity', this.editingBook.total_quantity);
-                            formData.append('available_quantity', this.editingBook.available_quantity);
-                            formData.append('year_published', this.editingBook.year_published);
-
-                            formData.append('action', this.editingBook.id ? 'edit' : 'add');
-
-                            // Debug log
-                            for (let pair of formData.entries()) {
-                                console.log(pair[0] + ': ' + pair[1]);
-                            }
-
-                            form.submit();
+                validateForm() {
+                    const requiredFields = ['title', 'author', 'publisher', 'year_published', 'total_quantity', 'shelf_location'];
+                    for (const field of requiredFields) {
+                        if (!this.editingBook[field]) {
+                            throw new Error(`Kolom ${field.replace('_', ' ')} harus diisi`);
                         }
-                    }))
-                })
-            </script>
-</body>
+                    }
+
+                    const currentYear = new Date().getFullYear();
+                    if (this.editingBook.year_published < 1900 || this.editingBook.year_published > currentYear) {
+                        throw new Error(`Tahun harus antara 1900 dan ${currentYear}`);
+                    }
+
+                    if (parseInt(this.editingBook.total_quantity) < 0) {
+                        throw new Error('Jumlah total tidak boleh negatif');
+                    }
+
+                    if (parseInt(this.editingBook.available_quantity) > parseInt(this.editingBook.total_quantity)) {
+                        throw new Error('Jumlah tersedia tidak boleh melebihi jumlah total');
+                    }
+                },
+
+                openAddModal() {
+                    this.clearForm();
+                    this.editingBook.year_published = new Date().getFullYear();
+                    this.editingBook.created_at = new Date().toISOString();
+                    this.editingBook.updated_by = 'Madleyym';
+                    this.isModalOpen = true;
+                },
+
+                openEditModal(book) {
+                    this.clearForm();
+                    this.editingBook = {
+                        ...book,
+                        cover_image_preview: book.cover_image ? `/sistem/uploads/book_covers/${book.cover_image}` : null,
+                        updated_by: 'Madleyym'
+                    };
+                    this.isModalOpen = true;
+                },
+
+                clearForm() {
+                    this.editingBook = {
+                        id: null,
+                        title: '',
+                        author: '',
+                        publisher: '',
+                        year_published: '',
+                        isbn: '',
+                        category: '',
+                        total_quantity: '',
+                        available_quantity: '',
+                        shelf_location: '',
+                        description: '',
+                        cover_image: '',
+                        cover_image_preview: null,
+                        created_at: '',
+                        updated_by: ''
+                    };
+                    this.resetImagePreview();
+                },
+
+                async confirmDelete(id) {
+                    try {
+                        if (await this.showConfirmDialog('Apakah Anda yakin ingin menghapus buku ini?')) {
+                            this.isLoading = true;
+                            window.location.href = `?action=delete&id=${id}`;
+                        }
+                    } catch (error) {
+                        this.showNotification(error.message, 'error');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                showConfirmDialog(message) {
+                    return new Promise((resolve) => {
+                        const result = confirm(message);
+                        resolve(result);
+                    });
+                },
+
+                getImageSource() {
+                    if (this.editingBook.cover_image_preview) {
+                        return this.editingBook.cover_image_preview;
+                    }
+                    if (this.editingBook.cover_image) {
+                        return `/sistem/uploads/book_covers/${this.editingBook.cover_image}`;
+                    }
+                    return this.defaultImagePath;
+                },
+
+                handleImagePreview(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        // Validasi ukuran file (5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            this.showNotification('Ukuran file tidak boleh lebih dari 5MB', 'error');
+                            this.resetImagePreview();
+                            return;
+                        }
+
+                        // Validasi tipe file
+                        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                        if (!allowedTypes.includes(file.type)) {
+                            this.showNotification('Hanya file JPG, PNG, dan GIF yang diperbolehkan', 'error');
+                            this.resetImagePreview();
+                            return;
+                        }
+
+                        // Buat preview
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.editingBook.cover_image_preview = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        this.resetImagePreview();
+                    }
+                },
+
+                handleImageError(event) {
+                    event.target.src = this.defaultImagePath;
+                },
+
+                resetImagePreview() {
+                    this.editingBook.cover_image_preview = null;
+                    const fileInput = this.$refs.fileInput;
+                    if (fileInput) fileInput.value = '';
+                },
+
+                async submitForm(e) {
+                    try {
+                        e.preventDefault();
+                        this.isLoading = true;
+
+                        this.validateForm();
+
+                        const form = e.target;
+                        const formData = new FormData(form);
+
+                        // Tambah timestamp dan user
+                        formData.append('updated_by', this.editingBook.updated_by);
+                        formData.append('updated_at', new Date().toISOString());
+
+                        // Submit form
+                        form.submit();
+
+                        this.showNotification(
+                            this.editingBook.id ? 'Buku berhasil diperbarui' : 'Buku berhasil ditambahkan'
+                        );
+                        this.isModalOpen = false;
+
+                    } catch (error) {
+                        this.showNotification(error.message, 'error');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                init() {
+                    // Watcher untuk total quantity
+                    this.$watch('editingBook.total_quantity', (value) => {
+                        if (parseInt(this.editingBook.available_quantity) > parseInt(value)) {
+                            this.editingBook.available_quantity = value;
+                        }
+                    });
+
+                    // Watcher untuk modal
+                    this.$watch('isModalOpen', (value) => {
+                        if (!value) {
+                            this.clearForm();
+                        }
+                    });
+                }
+            }));
+        });
+    </script>
 
 </html>

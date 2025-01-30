@@ -2,34 +2,103 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start(); 
-
+session_start();
+require_once __DIR__ . '/../config/bootstrap.php';
 require_once '../config/constants.php';
 require_once '../config/database.php';
 require_once '../classes/Book.php';
-// Hapus atau comment baris ini
-// require_once __DIR__ . '/../vendor/autoload.php';
 
-$database = new Database();
-$conn = $database->getConnection();
-$bookManager = new Book($conn);
-
-$keyword = $_GET['search'] ?? null;
-$filters = [
-    'category' => $_GET['category'] ?? null,
-    'min_year' => $_GET['min_year'] ?? null,
-    'max_year' => $_GET['max_year'] ?? null,
-    'language' => $_GET['language'] ?? null
-];
+// Pastikan direktori upload ada
+// Pastikan direktori dan file default ada
+$defaultImageDir = __DIR__ . "/../../uploads/books/";
+if (!file_exists($defaultImageDir)) {
+    mkdir($defaultImageDir, 0777, true);
+}
+// Copy file default-book-cover.jpg ke folder tersebut
+// Default book cover path
+$defaultBookCover = '/sistem/uploads/books/book-default.png';
 
 try {
-    $books = $keyword ?
-        $bookManager->searchBooks($keyword, $filters) :
-        $bookManager->searchBooks('', $filters);
+    $database = new Database();
+    $conn = $database->getConnection();
+    $bookManager = new Book($conn);
+
+    // Get search parameters with proper validation
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+    $category = isset($_GET['category']) ? trim($_GET['category']) : '';
+
+    // Perbaikan validasi tahun
+    $minYear = !empty($_GET['min_year']) ? (int)$_GET['min_year'] : '';
+    $maxYear = !empty($_GET['max_year']) ? (int)$_GET['max_year'] : '';
+
+    // Tambahan validasi untuk memastikan tahun valid
+    if ($minYear !== '' && ($minYear < 1900 || $minYear > date('Y'))) {
+        $minYear = '';
+    }
+    if ($maxYear !== '' && ($maxYear < 1900 || $maxYear > date('Y'))) {
+        $maxYear = '';
+    }
+    // Pagination
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $limit = 10;
+    $offset = ($page - 1) * $limit;
+
+    // Get books with all filters
+    $books = $bookManager->getAllBooks(
+        $limit,
+        $offset,
+        $search,
+        $category,
+        $minYear,
+        $maxYear
+    );
+
+    // Get total for pagination
+    $total = $bookManager->countTotalBooks(
+        $search,
+        $category,
+        $minYear,
+        $maxYear
+    );
+
+    $totalPages = ceil($total / $limit);
+
+    // Get categories for dropdown
+    $stmt = $conn->query("SELECT DISTINCT category FROM books WHERE category IS NOT NULL AND category != '' ORDER BY category");
+    $categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
 } catch (Exception $e) {
-    error_log("Book Search Error: " . $e->getMessage());
+    error_log("Daftar Buku Error: " . $e->getMessage());
     $books = [];
+    $total = 0;
+    $totalPages = 0;
+    $categories = [];
 }
+
+// Helper function untuk path gambar
+function getBookCoverPath($coverImage)
+{
+    if (!empty($coverImage)) {
+        return "/sistem/uploads/book_covers/" . htmlspecialchars($coverImage);
+    }
+    return "/sistem/uploads/books/book-default.png";
+}
+
+// Helper function untuk URL pagination
+function buildPaginationUrl($pageNum, $search, $filters)
+{
+    return "?page=" . $pageNum .
+        "&search=" . urlencode($search) .
+        "&category=" . urlencode($filters['category']) .
+        "&min_year=" . urlencode($filters['min_year'] ?? '') .
+        "&max_year=" . urlencode($filters['max_year'] ?? '');
+}
+
+// Create filters array for pagination
+$filters = [
+    'category' => $category,
+    'min_year' => $minYear,
+    'max_year' => $maxYear
+];
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -272,35 +341,45 @@ try {
         <section class="bg-white shadow-lg rounded-2xl p-8 mb-12">
             <h1 class="text-4xl font-bold text-center text-blue-700 mb-8">Perpustakaan Buku</h1>
 
-            <form action="books.php" method="GET" class="mb-12">
+            <form action="" method="GET" class="mb-12">
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <!-- Search input -->
                     <input
                         type="text"
                         name="search"
                         placeholder="Cari buku..."
-                        value="<?= htmlspecialchars($keyword ?? '') ?>"
+                        value="<?= htmlspecialchars($search) ?>"
                         class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <select
-                        name="category"
-                        class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                    <!-- Category dropdown -->
+                    <select name="category" class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Semua Kategori</option>
-                        <option value="novel">Novel</option>
-                        <option value="non-fiksi">Non-Fiksi</option>
-                        <option value="pendidikan">Pendidikan</option>
-                        <option value="biografi">Biografi</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= htmlspecialchars($cat) ?>" <?= $category === $cat ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cat) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
+
+                    <!-- Year range inputs -->
                     <input
                         type="number"
                         name="min_year"
                         placeholder="Tahun Min"
-                        value="<?= htmlspecialchars($filters['min_year'] ?? '') ?>"
+                        value="<?= $minYear !== '' ? htmlspecialchars($minYear) : '' ?>"
+                        min="1900"
+                        max="<?= date('Y') ?>"
                         class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
                     <input
                         type="number"
                         name="max_year"
                         placeholder="Tahun Maks"
-                        value="<?= htmlspecialchars($filters['max_year'] ?? '') ?>"
+                        value="<?= $maxYear !== '' ? htmlspecialchars($maxYear) : '' ?>"
+                        min="1900"
+                        max="<?= date('Y') ?>"
                         class="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
                     <button
                         type="submit"
                         class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out">
@@ -314,10 +393,17 @@ try {
                     <?php foreach ($books as $book): ?>
                         <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-2 transition duration-300 p-4 flex flex-col">
                             <div class="relative mb-4">
+                                <?php
+                                // Construct correct path to existing book_covers directory
+                                $imagePath = !empty($book['cover_image'])
+                                    ? "/sistem/uploads/book_covers/" . htmlspecialchars($book['cover_image'])
+                                    : "/sistem/uploads/books/default-book-cover.jpg";
+                                ?>
                                 <img
-                                    src="<?= !empty($book['cover_image']) ? htmlspecialchars($book['cover_image']) : '../assets/images/default-book-cover.jpg' ?>"
+                                    src="<?= $imagePath ?>"
                                     alt="<?= htmlspecialchars($book['title']) ?>"
-                                    class="w-full h-64 object-cover rounded-xl">
+                                    class="w-full h-64 object-cover rounded-xl"
+                                    onerror="this.src='/sistem/uploads/books/book-default.png'; this.onerror=null;">
                                 <?php if ($book['available_quantity'] <= 3 && $book['available_quantity'] > 0): ?>
                                     <span class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
                                         Tersisa <?= $book['available_quantity'] ?>
@@ -356,6 +442,38 @@ try {
                     </div>
                 <?php endif; ?>
             </div>
+            <div class="flex justify-center items-center space-x-2 mt-8">
+                <?php if ($page > 1): ?>
+                    <a href="?page=<?= ($page - 1) ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filters['category']) ?>&min_year=<?= urlencode($filters['min_year']) ?>&max_year=<?= urlencode($filters['max_year']) ?>"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        &laquo; Previous
+                    </a>
+                <?php endif; ?>
+
+                <div class="flex space-x-1">
+                    <?php
+                    // Show up to 5 pages
+                    $start = max(1, min($page - 2, $totalPages - 4));
+                    $end = min($start + 4, $totalPages);
+
+                    for ($i = $start; $i <= $end; $i++):
+                        $isActive = $i == $page;
+                    ?>
+                        <a href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filters['category']) ?>&min_year=<?= urlencode($filters['min_year']) ?>&max_year=<?= urlencode($filters['max_year']) ?>"
+                            class="px-4 py-2 <?= $isActive ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300' ?> rounded">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+                </div>
+
+                <?php if ($page < $totalPages): ?>
+                    <a href="?page=<?= ($page + 1) ?>&search=<?= urlencode($search) ?>&category=<?= urlencode($filters['category']) ?>&min_year=<?= urlencode($filters['min_year']) ?>&max_year=<?= urlencode($filters['max_year']) ?>"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Next &raquo;
+                    </a>
+                <?php endif; ?>
+            </div>
+
         </section>
     </main>
 

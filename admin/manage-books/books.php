@@ -1,17 +1,16 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+session_start();
 
-session_start(); // Add session start for consistent navigation
-// if (!isset($_SESSION['user_id'])) {
-//     $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-//     header('Location: /sistem/public/auth/login.php'); 
-// }
+// Base configuration
+define('BASE_URL', '/sistem');
+define('ROOT_PATH', dirname(__DIR__, 2));
+define('UPLOAD_PATH', ROOT_PATH . '/uploads');
+define('BOOK_COVERS_URL', BASE_URL . '/uploads/book_covers');
 
-require_once '../config/constants.php';
-require_once '../config/database.php';
-require_once '../classes/Book.php';
-// require_once __DIR__ . '/../vendor/autoload.php';
+// Include required files
+require_once ROOT_PATH . '/config/constants.php';
+require_once ROOT_PATH . '/config/database.php';
+require_once ROOT_PATH . '/classes/Book.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -28,7 +27,7 @@ $filters = [
 try {
     $books = $keyword ?
         $bookManager->searchBooks($keyword, $filters) :
-        $bookManager->searchBooks('', $filters);
+        $bookManager->getAllBooks($filters);
 } catch (Exception $e) {
     error_log("Book Search Error: " . $e->getMessage());
     $books = [];

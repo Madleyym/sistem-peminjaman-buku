@@ -1,9 +1,21 @@
 <?php
-// config/constants.php
 
-// System Configuration
-define('SITE_NAME', 'Sistem Peminjaman Buku');
-define('SITE_URL', 'http://localhost/SistemPeminjamanBuku');
+// Check if core constants exist
+if (!defined('BASE_URL') || !defined('ROOT_PATH') || !defined('UPLOAD_PATH')) {
+    require_once __DIR__ . '/../config/bootstrap.php';
+}
+
+if (!defined('SITE_NAME')) {
+    // System Configuration
+    define('SITE_NAME', 'Sistem Peminjaman Buku');
+    define('DEFAULT_BOOK_COVER', '/sistem/uploads/books/book-default.png');
+    define('BOOK_COVERS_PATH', UPLOAD_PATH . '/book_covers');
+    define('BOOK_COVERS_URL', BASE_URL . '/uploads/book_covers');
+    define('BOOK_UPLOAD_PATH', UPLOAD_PATH . '/books');
+    define('USER_UPLOAD_PATH', UPLOAD_PATH . '/users');
+
+    // ...existing code...
+}
 
 // Database Configuration
 define('DB_HOST', 'localhost');
@@ -14,12 +26,6 @@ define('DB_NAME', 'peminjaman_buku');
 // Security Configuration
 define('HASH_SALT', 'your_unique_salt_here');
 define('JWT_SECRET', 'your_jwt_secret_key');
-
-// File Paths
-define('ROOT_PATH', dirname(__DIR__));
-define('UPLOAD_PATH', ROOT_PATH . '/uploads');
-define('BOOK_UPLOAD_PATH', UPLOAD_PATH . '/books');
-define('USER_UPLOAD_PATH', UPLOAD_PATH . '/users');
 
 // Logging Configuration
 define('ERROR_LOG_PATH', ROOT_PATH . '/logs/error.log');
@@ -44,4 +50,3 @@ define('HTTP_UNAUTHORIZED', 401);
 define('HTTP_FORBIDDEN', 403);
 define('HTTP_NOT_FOUND', 404);
 define('HTTP_SERVER_ERROR', 500);
-
