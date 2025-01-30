@@ -140,12 +140,12 @@ try {
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl mr-8">
+                    <a href="/sistem/index.php" class="text-white font-bold text-xl mr-8">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                     <!-- Desktop Navigation Links -->
                     <div class="hidden md:flex space-x-4">
-                        <a href="/sistem/beranda-pengguna.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="/sistem/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
                         <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
                         <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
                     </div>
@@ -197,7 +197,7 @@ try {
         <!-- Mobile Menu -->
         <div x-show="open" class="md:hidden bg-blue-600">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="/sistem/beranda-pengguna.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
+                <a href="/sistem/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
                 <a href="/sistem/public/daftar-buku.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
                 <a href="/sistem/public/kontak.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
                 <?php if (!$isLoggedIn): ?>
@@ -286,7 +286,7 @@ try {
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="/sistem/beranda-pengguna.php" class="text-gray-400 hover:text-white transition-colors duration-200">Beranda</a></li>
+                        <li><a href="/sistem/index.php" class="text-gray-400 hover:text-white transition-colors duration-200">Beranda</a></li>
                         <li><a href="/sistem/public/daftar-buku.php" class="text-gray-400 hover:text-white transition-colors duration-200">Katalog Buku</a></li>
                         <li><a href="/sistem/public/kontak.php" class="text-gray-400 hover:text-white transition-colors duration-200">Hubungi Kami</a></li>
                     </ul>

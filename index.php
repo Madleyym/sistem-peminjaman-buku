@@ -302,7 +302,7 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl">
+                    <a href="/sistem/index.php" class="text-white font-bold text-xl">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                 </div>
@@ -327,7 +327,7 @@ try {
 
         <div x-show="open" class="md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-blue-600">
-                <a href="/sistem/beranda-pengguna.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
+                <a href="/sistem/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
                 <a href="/sistem/public/auth/users/book-loan.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
                 <?php if (empty($_SESSION['user_id'])): ?>
                     <a href="../../auth/login.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
@@ -346,11 +346,11 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl mr-8">
+                    <a href="/sistem/index.php" class="text-white font-bold text-xl mr-8">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                     <div class="flex space-x-4">
-                        <a href="/sistem/beranda-pengguna.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="/sistem/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
                         <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
                         <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
                     </div>

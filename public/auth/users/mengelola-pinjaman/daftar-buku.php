@@ -3,14 +3,15 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start(); // Add session start for consistent navigation
-// if (!isset($_SESSION['user_id'])) {
-//     $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-//     header('Location: /sistem/public/auth/login.php'); 
-// }
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+    header('Location: /sistem/public/auth/login.php'); 
+}
 
-require_once '../config/constants.php';
-require_once '../config/database.php';
-require_once '../classes/Book.php';
+require_once __DIR__ . '/../config/bootstrap.php';
+require_once __DIR__ . '/../config/constants.php';
+require_once __DIR__ . '/../classes/Book.php';
+
 // require_once __DIR__ . '/../vendor/autoload.php';
 
 $database = new Database();
@@ -33,7 +34,7 @@ try {
     error_log("Book Search Error: " . $e->getMessage());
     $books = [];
 }
-?>
+?> 
 <!DOCTYPE html>
 <html lang="id">
 

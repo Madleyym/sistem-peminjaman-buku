@@ -2,7 +2,8 @@
 session_start();
 
 // admin/includes/admin_auth.php
-function checkAdminAuth() {
+function checkAdminAuth()
+{
     if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         header("Location: /sistem/admin/auth/login.php");
         exit();
@@ -143,16 +144,15 @@ $chart_data = array_column($chart_results, 'total');
                 </div>
 
                 <!-- Navigation Links -->
-                <!-- Navigation Links -->
                 <div class="hidden md:block">
                     <div class="flex items-center space-x-4">
-                        <a href="/sistem/public/index.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="/sistem/index.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
                             <i class="fas fa-home mr-1"></i> Beranda
                         </a>
-                        <a href="/sistem/public/books.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
                             <i class="fas fa-book mr-1"></i> Buku
                         </a>
-                        <a href="/sistem/public/contact.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
                             <i class="fas fa-envelope mr-1"></i> Kontak
                         </a>
                         <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin'): ?>
@@ -220,50 +220,50 @@ $chart_data = array_column($chart_results, 'total');
             </h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <!-- <?php if (isset($_SESSION['user_id']) && $_SESSION['role'] === 'admin'): ?> -->
-                    <!-- Menu khusus admin -->
-                    <a href="/sistem/admin/manage-books/dashboard-book.php"
-                        class="group card-hover bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="bg-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300">
-                            <i class="fas fa-book-open text-2xl"></i>
-                        </div>
-                        <span class="font-semibold text-blue-800">Manajemen Buku</span>
-                    </a>
-
-                    <a href="/sistem/admin/manage-user/manage-user.php"
-                        class="group card-hover bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="bg-green-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300">
-                            <i class="fas fa-users text-2xl"></i>
-                        </div>
-                        <span class="font-semibold text-green-800">Manajemen Pengguna</span>
-                    </a>
-
-                    <a href="/sistem/admin/manage-borrow/dashboard-borrow.php"
-                        class="group card-hover bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="bg-yellow-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300">
-                            <i class="fas fa-handshake text-2xl"></i>
-                        </div>
-                        <span class="font-semibold text-yellow-800">Peminjaman</span>
-                    </a>
-
-                    <a href="/sistem/admin/reports/dashboard-reports.php"
-                        class="group card-hover bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
-                        <div class="bg-purple-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300">
-                            <i class="fas fa-chart-bar text-2xl"></i>
-                        </div>
-                        <span class="font-semibold text-purple-800">Laporan</span>
-                    </a>
-                <?php else: ?>
-                    <!-- Pesan untuk non-admin -->
-                    <div class="col-span-4 text-center p-6 bg-gray-50 rounded-xl">
-                        <p class="text-gray-600">
-                            <i class="fas fa-lock mr-2"></i>
-                            Menu admin hanya dapat diakses oleh administrator yang telah login.
-                            <?php if (!isset($_SESSION['user_id'])): ?>
-                                <a href="/sistem/admin/auth/login.php" class="text-blue-600 hover:text-blue-800 underline">Login sebagai admin</a>
-                            <?php endif; ?>
-                        </p>
+                <!-- Menu khusus admin -->
+                <a href="/sistem/admin/manage-books/dashboard-book.php"
+                    class="group card-hover bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="bg-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fas fa-book-open text-2xl"></i>
                     </div>
-                <?php endif; ?>
+                    <span class="font-semibold text-blue-800">Manajemen Buku</span>
+                </a>
+
+                <a href="/sistem/admin/manage-user/manage-user.php"
+                    class="group card-hover bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="bg-green-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fas fa-users text-2xl"></i>
+                    </div>
+                    <span class="font-semibold text-green-800">Manajemen Pengguna</span>
+                </a>
+
+                <a href="/sistem/admin/manage-borrow/dashboard-borrow.php"
+                    class="group card-hover bg-gradient-to-br from-yellow-50 to-yellow-100 hover:from-yellow-100 hover:to-yellow-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="bg-yellow-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fas fa-handshake text-2xl"></i>
+                    </div>
+                    <span class="font-semibold text-yellow-800">Peminjaman</span>
+                </a>
+
+                <a href="/sistem/admin/reports/dashboard-reports.php"
+                    class="group card-hover bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="bg-purple-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 transform group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fas fa-chart-bar text-2xl"></i>
+                    </div>
+                    <span class="font-semibold text-purple-800">Laporan</span>
+                </a>
+            <?php else: ?>
+                <!-- Pesan untuk non-admin -->
+                <div class="col-span-4 text-center p-6 bg-gray-50 rounded-xl">
+                    <p class="text-gray-600">
+                        <i class="fas fa-lock mr-2"></i>
+                        Menu admin hanya dapat diakses oleh administrator yang telah login.
+                        <?php if (!isset($_SESSION['user_id'])): ?>
+                            <a href="/sistem/admin/auth/login.php" class="text-blue-600 hover:text-blue-800 underline">Login sebagai admin</a>
+                        <?php endif; ?>
+                    </p>
+                </div>
+            <?php endif; ?>
             </div>
         </section>
 

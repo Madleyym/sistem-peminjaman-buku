@@ -274,7 +274,7 @@ $filters = [
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl">
+                    <a href="/sistem/index.php" class="text-white font-bold text-xl">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                 </div>
@@ -298,7 +298,7 @@ $filters = [
         <!-- Mobile Menu -->
         <div x-show="open" class="md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-blue-600">
-                <a href="/sistem/beranda-pengguna.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
+                <a href="/sistem/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
                 <a href="/sistem/public/daftar-buku.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
                 <?php if (empty($_SESSION['user_id'])): ?>
                     <a href="../../auth/login.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
@@ -314,11 +314,11 @@ $filters = [
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl mr-8">
+                    <a href="/sistem/index.php" class="text-white font-bold text-xl mr-8">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                     <div class="flex space-x-4">
-                        <a href="/sistem/beranda-pengguna.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="/sistem/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
                         <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
                         <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
                     </div>
@@ -478,7 +478,36 @@ $filters = [
     </main>
 
     <!-- Footer -->
-    <?php include '../includes/footer.php'; ?>
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
+            <div>
+                <h4 class="text-xl font-bold mb-4"><?= htmlspecialchars(SITE_NAME) ?></h4>
+                <p class="text-gray-400">Platform peminjaman buku digital modern dan efisien</p>
+                <div class="flex space-x-4 mt-4">
+                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xl font-bold mb-4">Tautan Cepat</h4>
+                <ul class="space-y-2">
+                    <li><a href="./sistem/index.php" class="text-gray-300 hover:text-white">Beranda</a></li>
+                    <li><a href="/buku.php" class="text-gray-300 hover:text-white">Buku</a></li>
+                    <li><a href="/kirim-kontak.php" class="text-gray-300 hover:text-white">Kontak</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-xl font-bold mb-4">Hubungi Kami</h4>
+                <p class="text-gray-400 mb-2">Email: support@perpustakaan.com</p>
+                <p class="text-gray-400 mb-2">Telepon: +62 888 1234 5678</p>
+                <p class="text-gray-400">Alamat: Jl. Perpustakaan No. 123, Kota</p>
+            </div>
+        </div>
+        <div class="text-center text-gray-500 mt-8 pt-4 border-t border-gray-700">
+            &copy; <?= date('Y') ?> <?= htmlspecialchars(SITE_NAME) ?>. Hak Cipta Dilindungi.
+        </div>
+    </footer>
 </body>
 
 </html>
