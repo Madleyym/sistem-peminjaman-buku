@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 function isAdmin()
 {
@@ -156,7 +157,7 @@ $chart_data = array_column($chart_results, 'total');
                                     <i class="fas fa-user-circle mr-1"></i>
                                     <?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?>
                                 </span>
-                                <a href="/sistem/admin/auth/logout.php"
+                                <a href="/sistem/admin/index.php"
                                     class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium">
                                     <i class="fas fa-sign-out-alt mr-1"></i> Logout
                                 </a>
