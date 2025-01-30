@@ -1,6 +1,4 @@
 <?php
-// File: sistem/admin/includes/admin_auth.php
-
 function checkAdminAuth() {
     // Start session if not already started
     if (session_status() === PHP_SESSION_NONE) {
