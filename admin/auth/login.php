@@ -12,7 +12,7 @@ require_once '../../classes/User.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id']) && isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header("Location: /sistem/admin/admin-index.php");
+    header("Location: /sistem/admin/index.php");
     exit();
 }
 
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Debug session
                 error_log('Session variables set: ' . print_r($_SESSION, true));
 
-                header("Location: /sistem/admin/admin-index.php");
+                header("Location: /sistem/admin/index.php");
                 exit();
             } else {
                 $errors[] = "Login gagal: " . ($result['message'] ?? 'Username atau password salah');
