@@ -174,7 +174,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- Gunakan style yang sama dengan admin-index.php -->
+    <!-- Gunakan style yang sama dengan index.php -->
     <style>
         :root {
             --primary-color: #3498db;
