@@ -266,46 +266,6 @@ $filters = [
             grid-template-columns: 1fr;
         }
     }
-
-    /* Footer Styles */
-    .site-footer {
-        background-color: var(--text-color);
-        color: var(--white);
-        padding: 40px 0;
-    }
-
-    .footer-content {
-        display: flex;
-        justify-content: space-between;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
-    }
-
-    .footer-section {
-        flex: 1;
-        margin-right: 20px;
-    }
-
-    .footer-section:last-child {
-        margin-right: 0;
-    }
-
-    .footer-section h4 {
-        margin-bottom: 15px;
-        color: var(--white);
-    }
-
-    .footer-links a {
-        color: var(--white);
-        opacity: 0.7;
-        text-decoration: none;
-        transition: opacity 0.3s ease;
-    }
-
-    .footer-links a:hover {
-        opacity: 1;
-    }
 </style>
 
 <body class="bg-gray-50 font-inter min-h-screen flex flex-col">
