@@ -1,16 +1,36 @@
 <?php
-// Di bagian atas file
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 
-// Define constants
+// Define all constants first
 define('LOGIN_URL', '/sistem/public/auth/login.php');
 define('BOOKS_PATH', '/sistem/public/daftar-buku.php');
 define('REGISTER_PATH', '/sistem/public/auth/register.php');
-define('CURRENT_URL', $_SERVER['REQUEST_URI']);
 define('SITE_NAME', 'Sistem Perpustakaan');
+define('CURRENT_URL', $_SERVER['REQUEST_URI']);
 
-// Check login status dari session
-$isLoggedIn = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+// Book cover paths
+define('UPLOAD_BOOK_COVERS_PATH', '/sistem/uploads/book_covers/');
+define('DEFAULT_BOOK_COVER_PATH', '/sistem/uploads/books/book-default.png');
+define('UPLOAD_BOOK_COVERS_URL', '/sistem/uploads/book_covers/');
+define('DEFAULT_BOOK_COVER_URL', '/sistem/uploads/books/book-default.png');
+
+// Create upload directory if it doesn't exist
+if (!file_exists(UPLOAD_BOOK_COVERS_PATH)) {
+    mkdir(UPLOAD_BOOK_COVERS_PATH, 0777, true);
+}
+
+// Include required files
+require_once $_SERVER['DOCUMENT_ROOT'] . '/sistem/config/constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/sistem/config/database.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/sistem/classes/Book.php';
+
+// Rest of your code...
+
+// Check login status
+$isLoggedIn = !empty($_SESSION['user_id']);
 
 // Validate book ID
 $book_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -19,10 +39,6 @@ if (!$book_id) {
     exit();
 }
 
-// Include required files
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../classes/Book.php';
-
 try {
     $database = new Database();
     $conn = $database->getConnection();
@@ -30,10 +46,12 @@ try {
     $book = $bookManager->getBookById($book_id);
 
     if (!$book) {
-        throw new Exception('Book not found');
+        header('Location: ' . BOOKS_PATH);
+        exit();
     }
 } catch (Exception $e) {
-    header('Location: ' . BOOKS_PATH . '?error=' . urlencode($e->getMessage()));
+    error_log("Book Detail Error: " . $e->getMessage());
+    header('Location: ' . BOOKS_PATH);
     exit();
 }
 ?>
@@ -43,268 +61,421 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Buku - <?= htmlspecialchars($book['title']) ?></title>
+    <title>Detail Buku - <?= htmlspecialchars($book['title']) ?> | <?= SITE_NAME ?></title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <style>
-        /* Custom CSS */
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #16a34a;
-            --accent-color: #dc2626;
-            --text-primary: #1f2937;
-            --text-secondary: #4b5563;
-            --bg-primary: #f3f4f6;
-            --bg-secondary: #ffffff;
-            --transition-speed: 300ms;
-            --border-radius: 0.75rem;
+            --primary-color: #3498db;
+            /* Indigo-600 menggantikan blue */
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --background-color: #f4f7f6;
+            --white: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-radius: 16px;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-primary);
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            min-height: 100vh;
         }
 
-        .card-hover-effect {
-            transition: transform var(--transition-speed);
+        .book-detail-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #f4f7f6 100%);
+            box-shadow: 0 15px 30px var(--shadow-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
         }
 
-        .card-hover-effect:hover {
-            transform: translateY(-4px);
-        }
-
-        .gradient-background {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        }
-
-        .custom-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .blur-background {
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
         }
 
-        .text-gradient {
-            background: linear-gradient(to right, #2563eb, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .button-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
         }
 
-        /* Animation Classes */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+        .button-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .book-metadata {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .metadata-item {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .metadata-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
+        .book-cover-container img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 20px var(--shadow-color);
+            transition: transform 0.3s ease;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .book-cover-container img:hover {
+            transform: scale(1.02);
         }
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <?php include __DIR__ . '/../includes/navigation.php'; ?>
 
-    <nav x-data="{ open: false }" class="bg-blue-700">
-        <!-- Mobile & Desktop Header -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <div class="flex items-center">
-                    <a href="/sistem/index.php" class="text-white font-bold text-xl mr-8">
-                        <?= htmlspecialchars(SITE_NAME) ?>
-                    </a>
-                    <!-- Desktop Navigation Links -->
-                    <div class="hidden md:flex space-x-4">
-                        <a href="/sistem/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
-                        <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
-                    </div>
-                </div>
-
-                <!-- Authentication Links -->
-                <div class="hidden md:flex space-x-4">
-                    <?php if (!$isLoggedIn): ?>
-                        <a href="<?= LOGIN_URL ?>" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
-                        <a href="<?= REGISTER_PATH ?>" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
-                    <?php else: ?>
-                        <div class="flex items-center space-x-4">
-                            <!-- Langsung menggunakan $_SESSION['username'] -->
-                            <span class="text-white text-sm"><?= htmlspecialchars($_SESSION['username']) ?></span>
-                            <a href="/sistem/public/auth/logout.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Logout</a>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden">
-                    <button
-                        @click="open = !open"
-                        type="button"
-                        class="bg-blue-600 inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-blue-500 focus:outline-none"
-                        aria-expanded="false">
-                        <span class="sr-only">Toggle menu</span>
-                        <svg
-                            x-show="!open"
-                            class="h-6 w-6"
-                            stroke="currentColor"
-                            fill="none"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg
-                            x-show="open"
-                            class="h-6 w-6"
-                            stroke="currentColor"
-                            fill="none"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div x-show="open" class="md:hidden bg-blue-600">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="/sistem/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
-                <a href="/sistem/public/daftar-buku.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
-                <a href="/sistem/public/kontak.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
-                <?php if (!$isLoggedIn): ?>
-                    <a href="<?= LOGIN_URL ?>" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
-                    <a href="<?= REGISTER_PATH ?>" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Daftar</a>
-                <?php else: ?>
-                    <div class="px-3 py-2 text-white">
-                        <!-- Langsung menggunakan $_SESSION['username'] -->
-                        <span class="block text-sm mb-2"><?= htmlspecialchars($_SESSION['username']) ?></span>
-                        <a href="/sistem/public/auth/logout.php" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Logout</a>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </nav>
-    <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
+        <!-- Login Modal for Non-logged Users -->
         <?php if (!$isLoggedIn): ?>
-            <!-- Login Required Modal -->
-            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 fade-in blur-background">
-                <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 card-hover-effect">
-                    <div class="text-center mb-8">
-                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-lock text-blue-500 text-3xl"></i>
+            <div class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+                <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 shadow-2xl">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-lock text-indigo-600 text-3xl"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Login Diperlukan</h2>
-                        <p class="text-gray-600">
-                            Anda harus login terlebih dahulu untuk melihat detail buku ini.
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Login Diperlukan</h2>
+                        <p class="text-gray-600 mb-8">
+                            Silakan login terlebih dahulu untuk melihat detail buku.
                         </p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <a href="<?= LOGIN_URL ?>?redirect=<?= urlencode(CURRENT_URL) ?>"
-                            class="block w-full bg-blue-500 text-white py-3 rounded-lg text-center hover:bg-blue-600 
-                                  transition-colors duration-200 font-medium">
-                            <i class="fas fa-sign-in-alt mr-2"></i> Login
-                        </a>
-                        <a href="<?= REGISTER_PATH ?>?redirect=<?= urlencode(CURRENT_URL) ?>"
-                            class="block w-full bg-green-500 text-white py-3 rounded-lg text-center hover:bg-green-600 
-                                  transition-colors duration-200 font-medium">
-                            <i class="fas fa-user-plus mr-2"></i> Daftar Akun Baru
-                        </a>
-                        <div class="relative">
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t border-gray-300"></div>
-                            </div>
-                            <div class="relative flex justify-center text-sm">
-                                <span class="px-2 bg-white text-gray-500">atau</span>
-                            </div>
-                        </div>
-                        <a href="<?= BOOKS_PATH ?>"
-                            class="block w-full text-gray-600 text-center py-2 hover:text-gray-900 transition-colors duration-200">
-                            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Daftar Buku
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blurred Background Content -->
-            <div class="filter blur-sm">
-                <div class="bg-white rounded-2xl shadow-lg p-8">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-6"><?= htmlspecialchars($book['title']) ?></h1>
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <img src="<?= !empty($book['cover_image']) ? htmlspecialchars($book['cover_image']) : '../assets/images/default-book-cover.jpg' ?>"
-                            alt="Cover Buku"
-                            class="w-full h-[500px] object-cover rounded-xl shadow-lg">
-                        <div class="space-y-6 opacity-50">
-                            <div class="bg-gray-100 p-6 rounded-xl">
-                                <p class="text-lg text-center">Detail buku akan tersedia setelah login...</p>
-                            </div>
+                        <div class="space-y-4">
+                            <a href="<?= LOGIN_URL ?>?redirect=<?= urlencode(CURRENT_URL) ?>"
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg block w-full text-center transition-all duration-300 transform hover:-translate-y-1">
+                                <i class="fas fa-sign-in-alt mr-2"></i>
+                                Login Sekarang
+                            </a>
+                            <a href="<?= REGISTER_PATH ?>"
+                                class="bg-gray-100 text-gray-700 py-2 px-4 rounded-lg block w-full text-center hover:bg-gray-200 transition-all duration-300 transform hover:-translate-y-1">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Daftar Akun Baru
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         <?php endif; ?>
-    </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 mt-auto">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-xl font-bold mb-4"><?= htmlspecialchars(SITE_NAME) ?></h3>
-                    <p class="text-gray-400">Sistem perpustakaan digital untuk memudahkan akses ke pengetahuan.</p>
+        <!-- Book Content -->
+        <div class="<?= !$isLoggedIn ? 'blur-sm' : '' ?> bg-white rounded-xl p-8 shadow-lg">
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Book Cover -->
+                <div class="book-cover-container">
+                    <img src="<?= !empty($book['cover_image'])
+                                    ? UPLOAD_BOOK_COVERS_URL . htmlspecialchars($book['cover_image'])
+                                    : DEFAULT_BOOK_COVER_URL ?>"
+                        alt="<?= htmlspecialchars($book['title']) ?>"
+                        class="w-full h-[500px] object-cover rounded-xl shadow-lg transition-transform duration-300 hover:scale-105"
+                        onerror="this.src='<?= DEFAULT_BOOK_COVER_URL ?>'">
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="/sistem/index.php" class="text-gray-400 hover:text-white transition-colors duration-200">Beranda</a></li>
-                        <li><a href="/sistem/public/daftar-buku.php" class="text-gray-400 hover:text-white transition-colors duration-200">Katalog Buku</a></li>
-                        <li><a href="/sistem/public/kontak.php" class="text-gray-400 hover:text-white transition-colors duration-200">Hubungi Kami</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Contact Info</h3>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><i class="fas fa-envelope mr-2"></i> perpustakaan@example.com</li>
-                        <li><i class="fas fa-phone mr-2"></i> (021) 1234-5678</li>
-                        <li><i class="fas fa-map-marker-alt mr-2"></i> Jl. Perpustakaan No. 123</li>
-                    </ul>
+
+                <!-- Book Details -->
+                <div class="space-y-6">
+                    <h1 class="text-3xl font-bold text-gray-800 border-b border-gray-200 pb-4">
+                        <?= htmlspecialchars($book['title']) ?>
+                    </h1>
+
+                    <!-- Book Metadata -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <?php
+                        $metadata = [
+                            ['icon' => 'user-edit', 'label' => 'Penulis', 'value' => $book['author']],
+                            ['icon' => 'building', 'label' => 'Penerbit', 'value' => $book['publisher']],
+                            ['icon' => 'calendar-alt', 'label' => 'Tahun Terbit', 'value' => $book['year_published']],
+                            ['icon' => 'barcode', 'label' => 'ISBN', 'value' => $book['isbn']],
+                            ['icon' => 'tag', 'label' => 'Kategori', 'value' => $book['category']],
+                            ['icon' => 'map-marker-alt', 'label' => 'Lokasi Rak', 'value' => $book['shelf_location']]
+                        ];
+
+                        foreach ($metadata as $item): ?>
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-<?= $item['icon'] ?> text-indigo-600"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm text-gray-500"><?= $item['label'] ?></h4>
+                                    <p class="font-medium text-gray-900"><?= htmlspecialchars($item['value']) ?></p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Availability Info -->
+                    <div class="bg-indigo-50 p-6 rounded-xl">
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <h4 class="text-sm text-gray-500">Total Buku</h4>
+                                <p class="text-2xl font-bold text-indigo-600">
+                                    <?= htmlspecialchars($book['total_quantity']) ?>
+                                </p>
+                            </div>
+                            <div>
+                                <h4 class="text-sm text-gray-500">Tersedia</h4>
+                                <p class="text-2xl font-bold <?= $book['available_quantity'] > 0 ?
+                                                                    'text-emerald-600' : 'text-red-600' ?>">
+                                    <?= htmlspecialchars($book['available_quantity']) ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code Button -->
+                    <button id="showQRCode"
+                        class="bg-indigo-500 hover:bg-indigo-600 text-white py-3 px-6 rounded-lg block w-full text-center transition-all duration-300 transform hover:-translate-y-1 mb-3">
+                        <i class="fas fa-qrcode mr-2"></i>
+                        Tampilkan QR Code
+                    </button>
+
+                    <!-- QR Code Modal -->
+                    <div id="qrModal" class="fixed inset-0 z-50 hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+                        <div class="absolute inset-0 flex items-center justify-center p-4">
+                            <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-auto shadow-2xl transform transition-all duration-300">
+                                <div class="text-center">
+                                    <h3 class="text-xl font-bold text-gray-800 mb-4">QR Code Peminjaman</h3>
+                                    <div id="qrCodeContainer" class="flex justify-center mb-4">
+                                        <!-- QR code will be generated here -->
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-4">
+                                        Tunjukkan QR code ini kepada petugas perpustakaan untuk meminjam buku
+                                    </p>
+                                    <div class="text-sm text-gray-600 mb-4">
+                                        <p class="font-semibold">Detail Buku:</p>
+                                        <p><?= htmlspecialchars($book['title']) ?></p>
+                                        <p>ISBN: <?= htmlspecialchars($book['isbn']) ?></p>
+                                    </div>
+                                    <button id="closeQRModal"
+                                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition-all duration-300">
+                                        Tutup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php if ($isLoggedIn): ?>
+                        <div class="mt-6">
+                            <?php if ($book['available_quantity'] > 0): ?>
+                                <a href="/sistem/public/pinjam-buku.php?id=<?= $book_id ?>"
+                                    class="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg block w-full text-center transition-all duration-300 transform hover:-translate-y-1">
+                                    <i class="fas fa-book-reader mr-2"></i>
+                                    Pinjam Buku
+                                </a>
+                            <?php else: ?>
+                                <button disabled
+                                    class="bg-gray-400 text-white w-full py-3 px-6 rounded-lg cursor-not-allowed">
+                                    <i class="fas fa-times-circle mr-2"></i>
+                                    Stok Tidak Tersedia
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
-                <p class="text-gray-400">&copy; <?= date('Y') ?> <?= htmlspecialchars(SITE_NAME) ?>. All Rights Reserved.</p>
+
+            <!-- Description Section -->
+            <div class="mt-8">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-info-circle text-indigo-600 mr-2"></i>
+                    Deskripsi Buku
+                </h3>
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <p class="text-gray-700 leading-relaxed">
+                        <?= nl2br(htmlspecialchars($book['description'])) ?>
+                    </p>
+                </div>
             </div>
         </div>
-    </footer>
+    </main>
+
+    <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+    <script>
+        // Default image path
+        const DEFAULT_BOOK_COVER = '<?= DEFAULT_BOOK_COVER_URL ?>';
+
+        // Handle image loading errors
+        document.addEventListener('error', function(e) {
+            if (e.target.tagName.toLowerCase() === 'img') {
+                e.target.src = DEFAULT_BOOK_COVER;
+            }
+        }, true);
+
+        // Function to check if image exists
+        function checkImage(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        // Main initialization when DOM is loaded
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Enable smooth scrolling
+            document.documentElement.style.scrollBehavior = 'smooth';
+
+            // Handle modal animation
+            const modal = document.querySelector('.modal-backdrop');
+            if (modal) {
+                modal.style.opacity = '0';
+                requestAnimationFrame(() => {
+                    modal.style.transition = 'opacity 0.3s ease';
+                    modal.style.opacity = '1';
+                });
+            }
+
+            // Add enhanced hover effects
+            const interactiveElements = document.querySelectorAll('a:not([disabled]), button:not([disabled])');
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('cursor-not-allowed')) {
+                        this.style.transform = 'translateY(-2px)';
+                        this.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                    }
+                });
+                element.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('cursor-not-allowed')) {
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '';
+                    }
+                });
+            });
+
+            // Check book cover image
+            const bookCover = document.querySelector('.book-cover-container img');
+            if (bookCover) {
+                const imageExists = await checkImage(bookCover.src);
+                if (!imageExists) {
+                    bookCover.src = DEFAULT_BOOK_COVER;
+                }
+            }
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // QR Code Modal Functionality
+            const showQRCodeBtn = document.getElementById('showQRCode');
+            const qrModal = document.getElementById('qrModal');
+            const closeQRModal = document.getElementById('closeQRModal');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+
+            // Data untuk QR Code
+            const qrData = JSON.stringify({
+                book_id: '<?= $book_id ?>',
+                isbn: '<?= htmlspecialchars($book['isbn']) ?>',
+                title: '<?= htmlspecialchars($book['title']) ?>',
+                user: '<?= htmlspecialchars($_SESSION['user_id']) ?>',
+                timestamp: '<?= date('Y-m-d H:i:s') ?>',
+                request_id: Math.random().toString(36).substring(2, 15)
+            });
+
+            // Generate QR Code
+            function generateQRCode() {
+                qrCodeContainer.innerHTML = ''; // Clear previous QR code
+                QRCode.toCanvas(qrCodeContainer, qrData, {
+                    width: 256,
+                    height: 256,
+                    margin: 2,
+                    color: {
+                        dark: '#4338ca', // Indigo-700 untuk konsistensi dengan tema
+                        light: '#ffffff'
+                    }
+                }, function(error) {
+                    if (error) console.error(error);
+                    console.log('QR Code generated successfully');
+                });
+            }
+
+            // Show Modal
+            if (showQRCodeBtn) {
+                showQRCodeBtn.addEventListener('click', function() {
+                    qrModal.classList.remove('hidden');
+                    generateQRCode();
+                    // Tambahkan animasi fade in
+                    requestAnimationFrame(() => {
+                        qrModal.style.opacity = '1';
+                    });
+                });
+            }
+
+            // Close Modal
+            if (closeQRModal) {
+                closeQRModal.addEventListener('click', function() {
+                    // Tambahkan animasi fade out
+                    qrModal.style.opacity = '0';
+                    setTimeout(() => {
+                        qrModal.classList.add('hidden');
+                    }, 300);
+                });
+            }
+
+            // Close Modal when clicking outside
+            if (qrModal) {
+                qrModal.addEventListener('click', function(e) {
+                    if (e.target === qrModal) {
+                        // Tambahkan animasi fade out
+                        qrModal.style.opacity = '0';
+                        setTimeout(() => {
+                            qrModal.classList.add('hidden');
+                        }, 300);
+                    }
+                });
+            }
+
+            // Close Modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && qrModal && !qrModal.classList.contains('hidden')) {
+                    // Tambahkan animasi fade out
+                    qrModal.style.opacity = '0';
+                    setTimeout(() => {
+                        qrModal.classList.add('hidden');
+                    }, 300);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
