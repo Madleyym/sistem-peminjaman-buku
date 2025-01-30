@@ -11,6 +11,7 @@ class Book
 
     public function getAllBooks($limit = 10, $offset = 0, $searchQuery = '', $categoryFilter = '', $minYear = '', $maxYear = '')
     {
+        // Removed join with categories table since it doesn't exist
         $query = "SELECT * FROM {$this->table_name} WHERE 1=1";
         $params = [];
 
@@ -54,14 +55,17 @@ class Book
 
     public function countTotalBooks($searchQuery = '', $categoryFilter = '', $minYear = '', $maxYear = '')
     {
+        // Query untuk menghitung total buku dengan kategori dari tabel books
         $query = "SELECT COUNT(*) as total FROM {$this->table_name} WHERE 1=1";
         $params = [];
 
+        // Filter pencarian
         if (!empty($searchQuery)) {
             $query .= " AND (title LIKE :search OR author LIKE :search OR isbn LIKE :search)";
             $params[':search'] = "%{$searchQuery}%";
         }
 
+        // Filter berdasarkan kategori dari kolom category
         if (!empty($categoryFilter)) {
             $query .= " AND category = :category";
             $params[':category'] = $categoryFilter;
@@ -155,68 +159,58 @@ class Book
     public function updateBook($bookId, $bookData)
     {
         try {
-            // Validate book ID
-            $bookId = filter_var($bookId, FILTER_VALIDATE_INT);
-            if ($bookId === false) {
-                throw new Exception("Invalid Book ID");
-            }
+            // Start building SQL and parameters
+            $updateFields = [];
+            $params = [];
 
-            $sql = "UPDATE {$this->table_name} SET 
-                    title = :title,
-                    author = :author,
-                    publisher = :publisher,
-                    year_published = :year_published,
-                    isbn = :isbn,
-                    category = :category,
-                    total_quantity = :total_quantity,
-                    available_quantity = :available_quantity,
-                    description = :description,
-                    shelf_location = :shelf_location";
-
-            // Add cover image update if provided
-            if (isset($bookData['book_cover'])) {
-                $sql .= ", cover_image = :cover_image";
-            }
-
-            $sql .= " WHERE id = :book_id";
-
-            $stmt = $this->conn->prepare($sql);
-
-            // Bind parameters
-            $params = [
-                ':title' => $bookData['title'],
-                ':author' => $bookData['author'],
-                ':publisher' => $bookData['publisher'] ?? '',
-                ':year_published' => $bookData['publication_year'],
-                ':isbn' => $bookData['isbn'],
-                ':category' => $bookData['category_id'],
-                ':total_quantity' => $bookData['total_copies'],
-                ':available_quantity' => $bookData['total_copies'], // Set available same as total for update
-                ':description' => $bookData['description'],
-                ':shelf_location' => $bookData['shelf_location'] ?? '',
-                ':book_id' => $bookId
+            // Map the fields
+            $fieldMappings = [
+                'title' => 'title',
+                'author' => 'author',
+                'publisher' => 'publisher',
+                'year_published' => 'year_published',
+                'isbn' => 'isbn',
+                'category' => 'category',
+                'total_quantity' => 'total_quantity',
+                'available_quantity' => 'available_quantity',
+                'description' => 'description',
+                'shelf_location' => 'shelf_location'
             ];
 
-            // Add cover image parameter if provided
-            if (isset($bookData['book_cover'])) {
-                $params[':cover_image'] = $bookData['book_cover'];
+            // Add book_cover if it exists
+            if (!empty($bookData['book_cover'])) {
+                $fieldMappings['book_cover'] = 'cover_image';
             }
 
-            // Execute with all parameters
+            foreach ($fieldMappings as $dataKey => $dbField) {
+                if (isset($bookData[$dataKey])) {
+                    $updateFields[] = "$dbField = :$dbField";
+                    $params[$dbField] = $bookData[$dataKey];
+                }
+            }
+
+            // Add book ID to parameters
+            $params['id'] = $bookId;
+
+            // Build the final SQL query
+            $sql = "UPDATE {$this->table_name} SET " .
+                implode(', ', $updateFields) .
+                " WHERE id = :id";
+
+            // Prepare and execute
+            $stmt = $this->conn->prepare($sql);
             $result = $stmt->execute($params);
 
             if (!$result) {
-                $errorInfo = $stmt->errorInfo();
-                throw new Exception("Database Error: " . $errorInfo[2]);
+                throw new Exception("Failed to update book");
             }
 
-            return $result;
+            return true;
         } catch (Exception $e) {
             error_log("Update Book Error: " . $e->getMessage());
-            return false;
+            throw $e;
         }
     }
-
     public function getBookById($bookId)
     {
         try {
@@ -419,9 +413,9 @@ class Book
             'publisher' => htmlspecialchars(trim($data['publisher'])),
             'isbn' => preg_replace('/[^0-9]/', '', $data['isbn']),
             'category' => htmlspecialchars(trim($data['category'])),
-            'year_published' => intval($data['year_published']),
-            'total_quantity' => intval($data['total_quantity']),
-            'available_quantity' => intval($data['available_quantity']),
+            'year_published' => intval($data['publication_year'] ?? 0),  // Sesuaikan dengan form
+            'total_quantity' => intval($data['total_copies'] ?? 0),      // Sesuaikan dengan form
+            'available_quantity' => intval($data['total_copies'] ?? 0),  // Set sama dengan total_copies
             'description' => htmlspecialchars(trim($data['description'])),
             'shelf_location' => htmlspecialchars(trim($data['shelf_location'])),
             // 'language' => htmlspecialchars(trim($data['language']))
