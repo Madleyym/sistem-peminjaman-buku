@@ -417,7 +417,7 @@ unset($_SESSION['message'], $_SESSION['error']);
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/admin/admin-index.php" class="flex items-center group">
+                    <a href="/sistem/admin/index.php" class="flex items-center group">
                         <i class="fas fa-book-reader text-white text-2xl mr-2 transform group-hover:scale-110 transition-transform"></i>
                         <span class="text-white font-bold text-xl"><?= htmlspecialchars(SITE_NAME) ?></span>
                     </a>
