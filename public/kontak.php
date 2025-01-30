@@ -96,11 +96,11 @@ $pageDescription = "Hubungi Kami untuk Pertanyaan dan Dukungan";
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/beranda-pengguna.php" class="text-white font-bold text-xl mr-8">
+                    <a href="/sistem/index.php" class="text-white font-bold text-xl mr-8">
                         <?= htmlspecialchars(SITE_NAME) ?>
                     </a>
                     <div class="flex space-x-4">
-                        <a href="/sistem/beranda-pengguna.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
+                        <a href="/sistem/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
                         <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
                         <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
                     </div>
@@ -202,7 +202,7 @@ $pageDescription = "Hubungi Kami untuk Pertanyaan dan Dukungan";
             <div>
                 <h4 class="text-xl font-bold mb-4">Tautan Cepat</h4>
                 <ul class="space-y-2">
-                    <li><a href="/sistem/beranda-pengguna.php " class="text-gray-300 hover:text-white">Beranda</a></li>
+                    <li><a href="/sistem/index.php " class="text-gray-300 hover:text-white">Beranda</a></li>
                     <li><a href="/buku" class="text-gray-300 hover:text-white">Buku</a></li>
                     <li><a href="/kontak" class="text-gray-300 hover:text-white">Kontak</a></li>
                 </ul>
