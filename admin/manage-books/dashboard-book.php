@@ -24,7 +24,12 @@ if (!file_exists($uploadDir)) {
 $database = new Database();
 $conn = $database->getConnection();
 $bookManager = new Book($conn);
-$categoryManager = new Category($conn);
+
+$categories = $bookManager->getCategory();
+
+// Debug output
+$categories = $bookManager->getCategory();
+error_log("Found categories: " . print_r($categories, true));
 
 // Pagination dan Filter
 $page = $_GET['page'] ?? 1;
@@ -53,10 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'title' => trim($_POST['title'] ?? ''),
             'author' => trim($_POST['author'] ?? ''),
             'publisher' => trim($_POST['publisher'] ?? ''),
-            'publication_year' => trim($_POST['year_published'] ?? ''),
+            'year_published' => trim($_POST['year_published'] ?? ''),
             'isbn' => trim($_POST['isbn'] ?? ''),
-            'category_id' => trim($_POST['category'] ?? ''),
-            'total_copies' => trim($_POST['total_quantity'] ?? ''),
+            'category' => trim($_POST['category'] ?? ''),
+            'total_quantity' => (int)trim($_POST['total_quantity'] ?? 0),
+            'available_quantity' => (int)trim($_POST['available_quantity'] ?? 0),
             'description' => trim($_POST['description'] ?? ''),
             'shelf_location' => trim($_POST['shelf_location'] ?? '')
         ];
@@ -125,7 +131,6 @@ function handleBookCoverUpload($file)
     ];
 }
 // Get Data
-$categories = $categoryManager->getAllCategories();
 $books = $bookManager->getAllBooks($limit, $offset, $searchQuery, $categoryFilter);
 $totalBooks = $bookManager->countTotalBooks($searchQuery, $categoryFilter);
 $totalPages = ceil($totalBooks / $limit);
@@ -426,7 +431,7 @@ unset($_SESSION['message'], $_SESSION['error']);
                 <!-- Navigation Links -->
                 <div class="hidden md:block">
                     <div class="flex items-center space-x-4">
-                        <a href="/sistem/public/index.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="/sistem/beranda-pengguna.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
                             <i class="fas fa-home mr-1"></i> Beranda
                         </a>
                         <a href="/sistem/public/books.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
@@ -478,7 +483,7 @@ unset($_SESSION['message'], $_SESSION['error']);
             x-transition:leave-end="opacity-0 transform -translate-y-2"
             class="md:hidden bg-blue-800">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="/sistem/public/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
+                <a href="/sistem/beranda-pengguna.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
                     <i class="fas fa-home mr-1"></i> Beranda
                 </a>
                 <a href="/sistem/public/books.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
@@ -666,12 +671,10 @@ unset($_SESSION['message'], $_SESSION['error']);
 
 
             <!-- Modal -->
-            <div x-show="isModalOpen"
-                x-cloak
-                class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div @click.away="isModalOpen = false"
-                    class="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div x-show="isModalOpen" x-cloak class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div @click.away="isModalOpen = false" class="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                     <div class="p-6">
+                        <!-- Header -->
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-2xl font-bold text-blue-700" x-text="editingBook.id ? 'Edit Buku' : 'Tambah Buku Baru'"></h2>
                             <button @click="isModalOpen = false" class="text-gray-400 hover:text-gray-600">
@@ -681,55 +684,41 @@ unset($_SESSION['message'], $_SESSION['error']);
                             </button>
                         </div>
 
-                        <!-- Form Modal Content - Lengkap -->
+                        <!-- Form -->
                         <form method="post" enctype="multipart/form-data" @submit.prevent="submitForm">
                             <input type="hidden" name="id" x-model="editingBook.id">
+
+                            <!-- Main Grid Layout -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Kolom Kiri -->
+                                <!-- Basic Book Information -->
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Judul Buku <span class="text-red-500">*</span></label>
-                                    <input type="text"
-                                        name="title"
-                                        x-model="editingBook.title"
-                                        required
+                                    <input type="text" name="title" x-model="editingBook.title" required
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Penulis <span class="text-red-500">*</span></label>
-                                    <input type="text"
-                                        name="author"
-                                        x-model="editingBook.author"
-                                        required
+                                    <input type="text" name="author" x-model="editingBook.author" required
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Penerbit <span class="text-red-500">*</span></label>
-                                    <input type="text"
-                                        name="publisher"
-                                        x-model="editingBook.publisher"
-                                        required
+                                    <input type="text" name="publisher" x-model="editingBook.publisher" required
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Tahun Publikasi <span class="text-red-500">*</span></label>
-                                    <input type="number"
-                                        name="year_published"
-                                        x-model="editingBook.year_published"
-                                        required
-                                        min="1900"
-                                        :max="new Date().getFullYear()"
+                                    <input type="number" name="year_published" x-model="editingBook.year_published" required
+                                        min="1900" :max="new Date().getFullYear()"
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium mb-2">ISBN</label>
-                                    <input type="text"
-                                        name="isbn"
-                                        x-model="editingBook.isbn"
-                                        placeholder="Format: XXX-XXX-XXX"
+                                    <input type="text" name="isbn" x-model="editingBook.isbn" placeholder="Format: XXX-XXX-XXX"
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
 
@@ -751,36 +740,27 @@ unset($_SESSION['message'], $_SESSION['error']);
                                     </select>
                                 </div>
 
+                                <!-- Quantity Information -->
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Total Kuantitas <span class="text-red-500">*</span></label>
-                                    <input type="number"
-                                        name="total_quantity"
-                                        x-model="editingBook.total_quantity"
-                                        required
-                                        min="0"
+                                    <input type="number" name="total_quantity" x-model="editingBook.total_quantity" required min="0"
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Kuantitas Tersedia <span class="text-red-500">*</span></label>
-                                    <input type="number"
-                                        name="available_quantity"
-                                        x-model="editingBook.available_quantity"
-                                        required
-                                        min="0"
-                                        :max="editingBook.total_quantity"
+                                    <input type="number" name="available_quantity" x-model="editingBook.available_quantity" required
+                                        min="0" :max="editingBook.total_quantity"
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Lokasi Rak <span class="text-red-500">*</span></label>
-                                    <input type="text"
-                                        name="shelf_location"
-                                        x-model="editingBook.shelf_location"
-                                        required
+                                    <input type="text" name="shelf_location" x-model="editingBook.shelf_location" required
                                         placeholder="Contoh: A-01"
                                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                                 </div>
+                            </div>
 
                                 <!-- Fields yang mengambil full width -->
                                 <div class="md:col-span-2">
@@ -819,24 +799,17 @@ unset($_SESSION['message'], $_SESSION['error']);
                                 </div>
                             </div>
 
-                            <!-- Tombol aksi -->
-                            <div class="mt-6 flex justify-end space-x-3">
-                                <button type="button"
-                                    @click="isModalOpen = false"
-                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-150">
-                                    Batal
-                                </button>
-                                <button type="submit"
-                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-150">
-                                    <span x-text="editingBook.id ? 'Update Buku' : 'Simpan Buku'"></span>
-                                </button>
-                            </div>
+                            <!-- Submit Button (you might want to add this) -->
+                            <div class="mt-6 flex justify-end">
+                                <div class="mt-6 flex justify-end">
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                        Simpan
+                                    </button>
+                                </div>
                         </form>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
 
     <!-- Alpine.js Script -->
     <script>
