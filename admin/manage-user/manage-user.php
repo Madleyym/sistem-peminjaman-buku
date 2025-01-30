@@ -96,7 +96,7 @@ $admins = $userManager->getAllAdmins();
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/admin/admin-index.php" class="flex items-center group">
+                    <a href="/sistem/admin/index.php" class="flex items-center group">
                         <i class="fas fa-book-reader text-white text-2xl mr-2 transform group-hover:scale-110 transition-transform"></i>
                         <span class="text-white font-bold text-xl"><?= htmlspecialchars(SITE_NAME) ?></span>
                     </a>
@@ -184,7 +184,7 @@ $admins = $userManager->getAllAdmins();
                 <!-- Breadcrumb -->
                 <nav class="hidden sm:flex">
                     <ol class="flex items-center space-x-2 text-gray-500 text-sm">
-                        <li><a href="/sistem/admin/admin-index.php" class="hover:text-blue-600">Dashboard</a></li>
+                        <li><a href="/sistem/admin/index.php" class="hover:text-blue-600">Dashboard</a></li>
                         <li><i class="fas fa-chevron-right text-xs"></i></li>
                         <li class="text-blue-600">Manajemen Pengguna</li>
                     </ol>
