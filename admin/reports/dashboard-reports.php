@@ -84,9 +84,9 @@ $overdueLoan = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Tambahkan style yang sama dengan admin-index.php -->
+    <!-- Tambahkan style yang sama dengan index.php -->
     <style>
-        /* Copy style dari admin-index.php */
+        /* Copy style dari index.php */
     </style>
 </head>
 
@@ -95,7 +95,7 @@ $overdueLoan = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/sistem/admin/admin-index.php" class="flex items-center group">
+                    <a href="/sistem/admin/index.php" class="flex items-center group">
                         <i class="fas fa-book-reader text-white text-2xl mr-2 transform group-hover:scale-110 transition-transform"></i>
                         <span class="text-white font-bold text-xl"><?= htmlspecialchars(SITE_NAME) ?></span>
                     </a>
@@ -169,7 +169,7 @@ $overdueLoan = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     </nav>
-    
+
     <main class="flex-grow container mx-auto px-4 py-8">
         <!-- Dashboard Header -->
         <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
@@ -180,7 +180,7 @@ $overdueLoan = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </h2>
                 <nav class="hidden sm:flex">
                     <ol class="flex items-center space-x-2 text-gray-500 text-sm">
-                        <li><a href="/sistem/admin/admin-index.php" class="hover:text-blue-600">Dashboard</a></li>
+                        <li><a href="/sistem/admin/index.php" class="hover:text-blue-600">Dashboard</a></li>
                         <li><i class="fas fa-chevron-right text-xs"></i></li>
                         <li class="text-blue-600">Laporan</li>
                     </ol>
@@ -287,25 +287,25 @@ $overdueLoan = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <div class="bg-white rounded-2xl shadow-lg p-6">
-    <h3 class="text-xl font-bold text-blue-700 mb-6 flex items-center">
-        <i class="fas fa-file-export mr-2"></i>
-        Ekspor Laporan
-    </h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <a href="/sistem/admin/reports/export-pdf.php" class="flex items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200">
-            <i class="fas fa-file-pdf text-red-500 mr-2"></i>
-            Ekspor PDF
-        </a>
-        <a href="/sistem/admin/reports/export-excel.php" class="flex items-center justify-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200">
-            <i class="fas fa-file-excel text-green-500 mr-2"></i>
-            Ekspor Excel
-        </a>
-        <a href="/sistem/admin/reports/print-report.php" target="_blank" class="flex items-center justify-center p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors duration-200">
-            <i class="fas fa-print text-gray-500 mr-2"></i>
-            Cetak Laporan
-        </a>
-    </div>
-</div>
+            <h3 class="text-xl font-bold text-blue-700 mb-6 flex items-center">
+                <i class="fas fa-file-export mr-2"></i>
+                Ekspor Laporan
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="/sistem/admin/reports/export-pdf.php" class="flex items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                    Ekspor PDF
+                </a>
+                <a href="/sistem/admin/reports/export-excel.php" class="flex items-center justify-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-file-excel text-green-500 mr-2"></i>
+                    Ekspor Excel
+                </a>
+                <a href="/sistem/admin/reports/print-report.php" target="_blank" class="flex items-center justify-center p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-print text-gray-500 mr-2"></i>
+                    Cetak Laporan
+                </a>
+            </div>
+        </div>
 
     </main>
 </body>
