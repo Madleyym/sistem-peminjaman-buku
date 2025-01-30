@@ -40,83 +40,107 @@ $pageDescription = "Hubungi Kami untuk Pertanyaan dan Dukungan";
         --text-color: #2c3e50;
     }
 
+    /* Reset and Base Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', 'Arial', sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: var(--background-color);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    /* Navigation */
+    .navbar {
+        background-color: var(--primary-color);
+        color: var(--white);
+        padding: 15px 0;
+    }
+
+    .navbar-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar-links {
+        display: flex;
+        gap: 20px;
+    }
+
+    .navbar-links a {
+        color: var(--white);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .navbar-links a:hover {
+        color: var(--secondary-color);
+    }
+
     /* Add any additional custom styles that aren't easily achievable with Tailwind */
     .contact-form input:focus,
     .contact-form textarea:focus {
         box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
     }
+    footer {
+        display: flex;
+        /* Mengatur footer menggunakan flexbox */
+        flex-direction: column;
+        /* Susunan vertikal */
+        justify-content: center;
+        /* Konten di tengah secara vertikal */
+        align-items: center;
+        /* Konten di tengah secara horizontal */
+        text-align: center;
+        /* Memusatkan teks */
+    }
+
+    .footer {
+        background-color: #2c3e50;
+        color: var(--white);
+        padding: 40px 0;
+    }
+
+    .footer-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+
+    .footer-section h4 {
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+    }
+
+    .footer-links a {
+        color: #bdc3c7;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        color: var(--white);
+    }
+
+    @media (min-width: 768px) {
+        footer .container {
+            grid-template-columns: repeat(3, 1fr);
+            /* 3 kolom di layar besar */
+        }
+    }
 </style>
 
 <body class="bg-gray-50 font-inter min-h-screen flex flex-col">
-    <!-- Mobile Navigation -->
-    <nav x-data="{ open: false }" class="bg-blue-700 md:hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/sistem/public/index.php" class="text-white font-bold text-xl">
-                        <?= htmlspecialchars(SITE_NAME) ?>
-                    </a>
-                </div>
-                <div class="-mr-2 flex md:hidden">
-                    <button
-                        @click="open = !open"
-                        type="button"
-                        class="bg-blue-600 inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-blue-500 focus:outline-none">
-                        <span class="sr-only">Open main menu</span>
-                        <svg x-show="!open" class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                        <svg x-show="open" class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div x-show="open" class="md:hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-blue-600">
-                <a href="/" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Beranda</a>
-                <a href="/sistem/public/daftar-buku.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Buku</a>
-                <?php if (empty($_SESSION['user_id'])): ?>
-                    <a href="../../auth/login.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Login</a>
-                    <a href="../../auth/register.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Daftar</a>
-                <?php else: ?>
-                    <a href="/sistem/public/auth/logout.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Logout</a>
-                    <a href="/sistem/public/auth/profile.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Profile</a>
-                <?php endif; ?>
-                <a href="/contact" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-500">Kontak</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Desktop Navigation (Copied from index.php) -->
-    <nav class="bg-blue-700 hidden md:block">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/sistem/index.php" class="text-white font-bold text-xl mr-8">
-                        <?= htmlspecialchars(SITE_NAME) ?>
-                    </a>
-                    <div class="flex space-x-4">
-                        <a href="/sistem/index.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Buku</a>
-                        <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
-                    </div>
-                </div>
-                <div class="flex space-x-4">
-                    <?php if (empty($_SESSION['user_id'])): ?>
-                        <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
-                        <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
-                    <?php else: ?>
-                        <a href="/sistem/public/auth/login.php" class="text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
-                        <a href="/sistem/public/auth/register.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">Daftar</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <!-- Navigation -->
+    <?php include '../includes/header.php'; ?>
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl shadow-2xl overflow-hidden mb-12 p-8">
@@ -202,9 +226,9 @@ $pageDescription = "Hubungi Kami untuk Pertanyaan dan Dukungan";
             <div>
                 <h4 class="text-xl font-bold mb-4">Tautan Cepat</h4>
                 <ul class="space-y-2">
-                    <li><a href="/sistem/index.php " class="text-gray-300 hover:text-white">Beranda</a></li>
-                    <li><a href="/buku" class="text-gray-300 hover:text-white">Buku</a></li>
-                    <li><a href="/kontak" class="text-gray-300 hover:text-white">Kontak</a></li>
+                    <li><a href="/" class="text-gray-300 hover:text-white">Beranda</a></li>
+                    <li><a href="/books" class="text-gray-300 hover:text-white">Buku</a></li>
+                    <li><a href="/contact" class="text-gray-300 hover:text-white">Kontak</a></li>
                 </ul>
             </div>
             <div>
