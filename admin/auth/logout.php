@@ -1,26 +1,14 @@
 <?php
+// Di /sistem/admin/auth/logout.php
 session_start();
+require_once '../../classes/User.php';
 
-// Unset all session variables
-$_SESSION = array();
+// Redirect ke halaman login admin
+$redirect_to = User::getLoginPath(User::getRoles()['ADMIN']);
 
-// Destroy the session
+// Hapus semua session
 session_destroy();
 
-// Delete the session cookie
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(
-        session_name(),
-        '',
-        time() - 42000,
-        $params["path"],
-        $params["domain"],
-        $params["secure"],
-        $params["httponly"]
-    );
-}
-
-// Redirect to login page
-header("Location: /sistem/admin/auth/login.php");
+// Redirect
+header("Location: " . $redirect_to);
 exit();
