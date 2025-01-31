@@ -6,10 +6,28 @@ session_start();
 
 // Define all constants first
 define('LOGIN_URL', '/sistem/public/auth/login.php');
+define('LOGOUT_URL', '/sistem/public/auth/logout.php'); // Tambahkan ini
 define('BOOKS_PATH', '/sistem/public/daftar-buku.php');
 define('REGISTER_PATH', '/sistem/public/auth/register.php');
 define('SITE_NAME', 'Sistem Perpustakaan');
 define('CURRENT_URL', $_SERVER['REQUEST_URI']);
+
+// Strict login check
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+    $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+    header('Location: ' . LOGIN_URL);
+    exit();
+}
+
+// Validate session
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+    // If last activity was more than 30 minutes ago
+    session_unset();
+    session_destroy();
+    header('Location: ' . LOGIN_URL . '?session=expired');
+    exit();
+}
+$_SESSION['last_activity'] = time(); // Update last activity time
 
 // Book cover paths
 define('UPLOAD_BOOK_COVERS_PATH', '/sistem/uploads/book_covers/');
@@ -17,7 +35,7 @@ define('DEFAULT_BOOK_COVER_PATH', '/sistem/uploads/books/book-default.png');
 define('UPLOAD_BOOK_COVERS_URL', '/sistem/uploads/book_covers/');
 define('DEFAULT_BOOK_COVER_URL', '/sistem/uploads/books/book-default.png');
 
-// Create upload directory if it doesn't exist
+// Check if directory exists and create if it doesn't
 if (!file_exists(UPLOAD_BOOK_COVERS_PATH)) {
     mkdir(UPLOAD_BOOK_COVERS_PATH, 0777, true);
 }
@@ -27,12 +45,41 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/sistem/config/constants.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/sistem/config/database.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/sistem/classes/Book.php';
 
-// Rest of your code...
+// Check if user is logged in, if not redirect to login
+if (empty($_SESSION['user_id'])) {
+    $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+    header('Location: ' . LOGIN_URL);
+    exit();
+}
 
-// Check login status
-$isLoggedIn = !empty($_SESSION['user_id']);
+// Initialize database connection
+try {
+    $database = new Database();
+    $conn = $database->getConnection();
+} catch (Exception $e) {
+    error_log("Database connection error: " . $e->getMessage());
+    header('Location: ' . LOGIN_URL . '?error=database');
+    exit();
+}
 
-// Validate book ID
+// Fetch user data
+try {
+    $userQuery = $conn->prepare("SELECT id, name, email, phone_number, address FROM users WHERE id = ?");
+    $userQuery->execute([$_SESSION['user_id']]);
+    $userData = $userQuery->fetch(PDO::FETCH_ASSOC);
+
+    if (!$userData) {
+        session_destroy();
+        header('Location: ' . LOGIN_URL . '?error=invalid_user');
+        exit();
+    }
+} catch (Exception $e) {
+    error_log("Error fetching user data: " . $e->getMessage());
+    header('Location: ' . LOGIN_URL . '?error=user_data');
+    exit();
+}
+
+// Validate and fetch book data
 $book_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$book_id) {
     header('Location: ' . BOOKS_PATH);
@@ -40,8 +87,6 @@ if (!$book_id) {
 }
 
 try {
-    $database = new Database();
-    $conn = $database->getConnection();
     $bookManager = new Book($conn);
     $book = $bookManager->getBookById($book_id);
 
@@ -54,6 +99,9 @@ try {
     header('Location: ' . BOOKS_PATH);
     exit();
 }
+
+// Set login status after all checks pass
+$isLoggedIn = true;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -67,11 +115,14 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4F46E5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary-color: #3498db;
-            /* Indigo-600 menggantikan blue */
             --secondary-color: #2ecc71;
             --accent-color: #e74c3c;
             --text-color: #2c3e50;
@@ -79,6 +130,7 @@ try {
             --white: #ffffff;
             --shadow-color: rgba(0, 0, 0, 0.1);
             --border-radius: 16px;
+            --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         body {
@@ -89,6 +141,7 @@ try {
             min-height: 100vh;
         }
 
+        /* Existing styles */
         .book-detail-container {
             background: linear-gradient(135deg, #f5f7fa 0%, #f4f7f6 100%);
             box-shadow: 0 15px 30px var(--shadow-color);
@@ -102,19 +155,64 @@ try {
             backdrop-filter: blur(8px);
         }
 
+        /* Enhanced Modal Styles */
+        #userDataModal {
+            perspective: 1000px;
+        }
+
+        #userDataModal .bg-white {
+            backdrop-filter: blur(16px);
+            box-shadow: var(--modal-shadow);
+            transform-origin: center;
+            animation: modalOpen 0.4s ease-out;
+        }
+
+        @keyframes modalOpen {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Form Elements Styling */
+        .form-input {
+            @apply w-full px-4 py-3 rounded-lg border transition-all duration-200;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-input:focus {
+            @apply ring-2 ring-blue-500 border-transparent;
+            transform: translateY(-1px);
+        }
+
+        .form-input:disabled,
+        .form-input[readonly] {
+            background: rgba(243, 244, 246, 0.9);
+        }
+
+        /* Button Styles */
         .button-primary {
             background-color: var(--primary-color);
             color: var(--white);
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.25);
         }
 
         .button-primary:hover {
             background-color: #2980b9;
             transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(52, 152, 219, 0.3);
         }
 
+        /* Book Metadata Styling */
         .book-metadata {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -126,30 +224,93 @@ try {
             display: flex;
             align-items: start;
             gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .metadata-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
 
         .metadata-icon {
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            background-color: var(--primary-color);
+            justify-center: center;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
             color: var(--white);
             border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
         }
 
+        /* Book Cover Styling */
         .book-cover-container img {
             width: 100%;
             height: 500px;
             object-fit: cover;
             border-radius: var(--border-radius);
-            box-shadow: 0 10px 20px var(--shadow-color);
-            transition: transform 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .book-cover-container img:hover {
-            transform: scale(1.02);
+            transform: scale(1.02) translateY(-5px);
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15),
+                0 15px 15px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Modal Animation */
+        .modal-enter-active,
+        .modal-leave-active {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .modal-enter,
+        .modal-leave-to {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        /* Input Focus States */
+        input:focus,
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        /* Responsive Typography */
+        @media (max-width: 640px) {
+            body {
+                font-size: 14px;
+            }
+
+            .book-cover-container img {
+                height: 300px;
+            }
         }
     </style>
 </head>
@@ -286,11 +447,12 @@ try {
                     <?php if ($isLoggedIn): ?>
                         <div class="mt-6">
                             <?php if ($book['available_quantity'] > 0): ?>
-                                <a href="/sistem/public/pinjam-buku.php?id=<?= $book_id ?>"
-                                    class="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg block w-full text-center transition-all duration-300 transform hover:-translate-y-1">
+                                <!-- Di bagian tombol Pinjam Buku -->
+                                <button type="button"
+                                    class="pinjamBukuBtn bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg block w-full text-center transition-all duration-300 transform hover:-translate-y-1">
                                     <i class="fas fa-book-reader mr-2"></i>
                                     Pinjam Buku
-                                </a>
+                                </button>
                             <?php else: ?>
                                 <button disabled
                                     class="bg-gray-400 text-white w-full py-3 px-6 rounded-lg cursor-not-allowed">
@@ -303,6 +465,105 @@ try {
                 </div>
             </div>
 
+            <!-- Modal Form for User Data -->
+            <div id="userDataModal" class="fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300">
+                <!-- Backdrop with blur effect -->
+                <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm"></div>
+
+                <!-- Modal Container -->
+                <div class="absolute inset-0 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-auto shadow-2xl transform transition-all duration-300 space-y-6">
+                        <!-- Header -->
+                        <div class="text-center mb-6">
+                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 mb-4">
+                                <i class="fas fa-user-edit text-2xl text-indigo-600"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800">Konfirmasi Data Peminjaman</h3>
+                            <p class="text-gray-500 mt-2">Silakan periksa kembali data Anda sebelum melanjutkan</p>
+                        </div>
+
+                        <!-- Form -->
+                        <form id="userDataForm" method="POST" action="/sistem/user/proses-user-data.php" class="space-y-6">
+                            <!-- Personal Information Section -->
+                            <div class="space-y-4">
+                                <!-- Name Field -->
+                                <div class="relative">
+                                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        <i class="fas fa-user text-indigo-600 mr-2"></i>Nama Lengkap
+                                    </label>
+                                    <input type="text" id="name" name="name"
+                                        value="<?= htmlspecialchars($userData['name']) ?>"
+                                        required
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                                        readonly>
+                                </div>
+
+                                <!-- Email Field -->
+                                <div class="relative">
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                                        <i class="fas fa-envelope text-indigo-600 mr-2"></i>Email
+                                    </label>
+                                    <input type="email" id="email" name="email"
+                                        value="<?= htmlspecialchars($userData['email']) ?>"
+                                        required
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-800 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                                        readonly>
+                                </div>
+
+                                <!-- Phone Number Field -->
+                                <div class="relative">
+                                    <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">
+                                        <i class="fas fa-phone text-indigo-600 mr-2"></i>Nomor Telepon
+                                    </label>
+                                    <input type="tel" id="phone_number" name="phone_number"
+                                        value="<?= htmlspecialchars($userData['phone_number']) ?>"
+                                        required pattern="[0-9]{10,13}"
+                                        title="Masukkan nomor telepon valid (10-13 digit)"
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                                        placeholder="Contoh: 08123456789">
+                                </div>
+
+                                <!-- Address Field -->
+                                <div class="relative">
+                                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">
+                                        <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>Alamat Lengkap
+                                    </label>
+                                    <textarea id="address" name="address" required
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
+                                        rows="3"
+                                        placeholder="Masukkan alamat lengkap Anda"><?= htmlspecialchars($userData['address']) ?></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Hidden Fields -->
+                            <input type="hidden" name="book_id" value="<?= htmlspecialchars($book_id) ?>">
+                            <input type="hidden" name="user_id" value="<?= htmlspecialchars($userData['id']) ?>">
+                            <input type="hidden" name="borrow_date" value="<?= date('Y-m-d H:i:s') ?>">
+                            <input type="hidden" name="status" value="pending">
+
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col space-y-3">
+                                <button type="submit"
+                                    class="flex items-center justify-center w-full px-6 py-3 text-base font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition-all duration-200 hover:-translate-y-1">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    Konfirmasi Peminjaman
+                                </button>
+
+                                <button type="button" id="closeUserDataModal"
+                                    class="flex items-center justify-center w-full px-6 py-3 text-base font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transform transition-all duration-200">
+                                    <i class="fas fa-times-circle mr-2"></i>
+                                    Batal
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Current Date Info -->
+                        <div class="text-center text-sm text-gray-500 mt-4">
+                            <p>Tanggal Peminjaman: <?= date('d F Y H:i') ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Description Section -->
             <div class="mt-8">
                 <h3 class="text-2xl font-semibold text-gray-800 mb-4">
@@ -315,6 +576,7 @@ try {
                     </p>
                 </div>
             </div>
+
         </div>
     </main>
 
@@ -339,6 +601,16 @@ try {
                 img.onerror = () => resolve(false);
                 img.src = url;
             });
+        }
+
+        // Form validation functions
+        function validatePhoneNumber(phone) {
+            const phoneRegex = /^[0-9]{10,13}$/;
+            return phoneRegex.test(phone);
+        }
+
+        function validateAddress(address) {
+            return address.trim().length >= 10;
         }
 
         // Main initialization when DOM is loaded
@@ -413,13 +685,13 @@ try {
 
             // Generate QR Code
             function generateQRCode() {
-                qrCodeContainer.innerHTML = ''; // Clear previous QR code
+                qrCodeContainer.innerHTML = '';
                 QRCode.toCanvas(qrCodeContainer, qrData, {
                     width: 256,
                     height: 256,
                     margin: 2,
                     color: {
-                        dark: '#4338ca', // Indigo-700 untuk konsistensi dengan tema
+                        dark: '#4338ca',
                         light: '#ffffff'
                     }
                 }, function(error) {
@@ -428,22 +700,19 @@ try {
                 });
             }
 
-            // Show Modal
+            // QR Code Modal Event Listeners
             if (showQRCodeBtn) {
                 showQRCodeBtn.addEventListener('click', function() {
                     qrModal.classList.remove('hidden');
                     generateQRCode();
-                    // Tambahkan animasi fade in
                     requestAnimationFrame(() => {
                         qrModal.style.opacity = '1';
                     });
                 });
             }
 
-            // Close Modal
             if (closeQRModal) {
                 closeQRModal.addEventListener('click', function() {
-                    // Tambahkan animasi fade out
                     qrModal.style.opacity = '0';
                     setTimeout(() => {
                         qrModal.classList.add('hidden');
@@ -451,27 +720,135 @@ try {
                 });
             }
 
-            // Close Modal when clicking outside
-            if (qrModal) {
-                qrModal.addEventListener('click', function(e) {
-                    if (e.target === qrModal) {
-                        // Tambahkan animasi fade out
-                        qrModal.style.opacity = '0';
-                        setTimeout(() => {
-                            qrModal.classList.add('hidden');
-                        }, 300);
+            // User Data Modal Functionality
+            const pinjamBukuBtn = document.querySelector('.pinjamBukuBtn');
+            const userDataModal = document.getElementById('userDataModal');
+            const closeUserDataModal = document.getElementById('closeUserDataModal');
+            const userDataForm = document.getElementById('userDataForm');
+
+            // Form submission handling
+            if (userDataForm) {
+                userDataForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    try {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Memproses...',
+                            text: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        const formData = new FormData(this);
+
+                        // Debug: Log form data
+                        for (let pair of formData.entries()) {
+                            console.log(pair[0] + ': ' + pair[1]);
+                        }
+
+                        const response = await fetch('/sistem/user/proses-user-data.php', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        // Debug: Log raw response
+                        const rawResponse = await response.text();
+                        console.log('Raw response:', rawResponse);
+
+                        let result;
+                        try {
+                            result = JSON.parse(rawResponse);
+                        } catch (e) {
+                            console.error('JSON Parse Error:', e);
+                            throw new Error('Server returned invalid JSON response');
+                        }
+
+                        if (result.success) {
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: result.message || 'Permintaan peminjaman berhasil diajukan',
+                                confirmButtonColor: '#4F46E5'
+                            });
+                            window.location.href = '/sistem/user/pinjaman.php';
+                        } else {
+                            throw new Error(result.message || 'Terjadi kesalahan saat memproses permintaan');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: error.message || 'Terjadi kesalahan sistem. Silakan coba lagi nanti.',
+                            confirmButtonColor: '#4F46E5'
+                        });
                     }
                 });
+
+                // Real-time phone number validation
+                const phoneInput = document.getElementById('phone_number');
+                if (phoneInput) {
+                    phoneInput.addEventListener('input', function() {
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                        if (this.value.length > 13) {
+                            this.value = this.value.slice(0, 13);
+                        }
+                    });
+                }
             }
 
-            // Close Modal with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && qrModal && !qrModal.classList.contains('hidden')) {
-                    // Tambahkan animasi fade out
-                    qrModal.style.opacity = '0';
+            // Modal Event Listeners
+            if (pinjamBukuBtn) {
+                pinjamBukuBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    userDataModal.classList.remove('hidden');
+                    requestAnimationFrame(() => {
+                        userDataModal.style.opacity = '1';
+                    });
+                });
+            }
+
+            if (closeUserDataModal) {
+                closeUserDataModal.addEventListener('click', function() {
+                    userDataModal.style.opacity = '0';
                     setTimeout(() => {
-                        qrModal.classList.add('hidden');
+                        userDataModal.classList.add('hidden');
                     }, 300);
+                });
+            }
+
+            // Close modals when clicking outside
+            [qrModal, userDataModal].forEach(modal => {
+                if (modal) {
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            this.style.opacity = '0';
+                            setTimeout(() => {
+                                this.classList.add('hidden');
+                            }, 300);
+                        }
+                    });
+                }
+            });
+
+            // Global escape key handler
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    [qrModal, userDataModal].forEach(modal => {
+                        if (modal && !modal.classList.contains('hidden')) {
+                            modal.style.opacity = '0';
+                            setTimeout(() => {
+                                modal.classList.add('hidden');
+                            }, 300);
+                        }
+                    });
                 }
             });
         });
