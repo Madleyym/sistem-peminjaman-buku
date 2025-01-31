@@ -1,86 +1,97 @@
 <?php
-
 session_start();
-function isAdmin()
-{
-    return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
-}
-// Kode lainnya...
+require_once '../classes/User.php';
 require_once '../config/constants.php';
 require_once '../config/database.php';
 require_once '../classes/Book.php';
 
+function isAdmin()
+{
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+}
+
+// Inisialisasi database
 $database = new Database();
 $conn = $database->getConnection();
 $bookManager = new Book($conn);
 
-// Fetch statistics
+// Data yang bisa dilihat semua pengguna
 $totalBooks = $bookManager->countTotalBooks();
-$lowStockBooks = $bookManager->countLowStockBooks();
-$recentlyAddedBooks = $bookManager->getRecentlyAddedBooks(5);
 
+// Data yang hanya bisa dilihat admin
+if (isAdmin()) {
+    $lowStockBooks = $bookManager->countLowStockBooks();
+    $recentlyAddedBooks = $bookManager->getRecentlyAddedBooks(5);
 
-// Analytics date ranges
-$today = date('Y-m-d');
-$week_ago = date('Y-m-d', strtotime('-7 days'));
+    // Analytics date ranges
+    $today = date('Y-m-d');
+    $week_ago = date('Y-m-d', strtotime('-7 days'));
 
+    // Fetch analytics data
+    function getAnalyticsData($conn, $today, $week_ago)
+    {
+        // Total activities in last 7 days
+        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM activity_logs WHERE created_at >= ?");
+        $stmt->execute([$week_ago]);
+        $total_activities = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-// Fetch analytics data
-function getAnalyticsData($conn, $today, $week_ago)
-{
-    // Total activities in last 7 days
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM activity_logs WHERE created_at >= ?");
+        // Unique users today
+        $stmt = $conn->prepare("SELECT COUNT(DISTINCT user_id) as total FROM activity_logs WHERE DATE(created_at) = ?");
+        $stmt->execute([$today]);
+        $unique_users = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        // Today's actions
+        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM activity_logs WHERE DATE(created_at) = ?");
+        $stmt->execute([$today]);
+        $today_actions = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        return [
+            'total_activities' => $total_activities,
+            'unique_users' => $unique_users,
+            'today_actions' => $today_actions
+        ];
+    }
+
+    $analytics = getAnalyticsData($conn, $today, $week_ago);
+
+    // Recent activities with user names
+    $stmt = $conn->prepare("
+        SELECT al.*, u.name 
+        FROM activity_logs al 
+        LEFT JOIN users u ON al.user_id = u.id 
+        ORDER BY al.created_at DESC 
+        LIMIT 5
+    ");
+    $stmt->execute();
+    $recent_activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Chart data
+    $stmt = $conn->prepare("
+        SELECT DATE(created_at) as date, COUNT(*) as total 
+        FROM activity_logs 
+        WHERE created_at >= ? 
+        GROUP BY DATE(created_at) 
+        ORDER BY date ASC
+    ");
     $stmt->execute([$week_ago]);
-    $total_activities = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    $chart_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Unique users today
-    $stmt = $conn->prepare("SELECT COUNT(DISTINCT user_id) as total FROM activity_logs WHERE DATE(created_at) = ?");
-    $stmt->execute([$today]);
-    $unique_users = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    $chart_dates = array_map(function ($result) {
+        return date('d M', strtotime($result['date']));
+    }, $chart_results);
 
-    // Today's actions
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM activity_logs WHERE DATE(created_at) = ?");
-    $stmt->execute([$today]);
-    $today_actions = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-    return [
-        'total_activities' => $total_activities,
-        'unique_users' => $unique_users,
-        'today_actions' => $today_actions
+    $chart_data = array_column($chart_results, 'total');
+} else {
+    // Data default untuk non-admin
+    $analytics = [
+        'total_activities' => '**',
+        'unique_users' => '**',
+        'today_actions' => '**'
     ];
+    $recent_activities = [];
+    $chart_dates = [];
+    $chart_data = [];
 }
-
-$analytics = getAnalyticsData($conn, $today, $week_ago);
-
-// Recent activities with user names
-$stmt = $conn->prepare("
-    SELECT al.*, u.name 
-    FROM activity_logs al 
-    LEFT JOIN users u ON al.user_id = u.id 
-    ORDER BY al.created_at DESC 
-    LIMIT 5
-");
-$stmt->execute();
-$recent_activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Chart data
-$stmt = $conn->prepare("
-    SELECT DATE(created_at) as date, COUNT(*) as total 
-    FROM activity_logs 
-    WHERE created_at >= ? 
-    GROUP BY DATE(created_at) 
-    ORDER BY date ASC
-");
-$stmt->execute([$week_ago]);
-$chart_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$chart_dates = array_map(function ($result) {
-    return date('d M', strtotime($result['date']));
-}, $chart_results);
-
-$chart_data = array_column($chart_results, 'total');
-// Tambahkan ini di bagian atas file setelah session_start()
-// var_dump($_SESSION); // Untuk debugging, hapus setelah selesai
 
 ?>
 
@@ -95,116 +106,12 @@ $chart_data = array_column($chart_results, 'total');
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --accent-color: #e74c3c;
-            --text-color: #2c3e50;
-            --background-color: #f4f7f6;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--background-color);
-        }
-
-        .card-hover {
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-5px);
-        }
-
-        .gradient-bg {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        }
-    </style>
+    <link rel="stylesheet" href="/sistem/admin/includes/styles.css">
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
-    <!-- Enhanced Navigation with Improved Styling -->
-    <nav x-data="{ open: false }" class="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/sistem/admin/index.php" class="flex items-center group">
-                        <i class="fas fa-book-reader text-white text-2xl mr-2 transform group-hover:scale-110 transition-transform"></i>
-                        <span class="text-white font-bold text-xl"><?= htmlspecialchars(SITE_NAME) ?></span>
-                    </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden md:block">
-                    <div class="flex items-center space-x-4">
-                        <a href="/sistem/index.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-home mr-1"></i> Beranda
-                        </a>
-                        <a href="/sistem/public/daftar-buku.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-book mr-1"></i> Buku
-                        </a>
-                        <a href="/sistem/public/kontak.php" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
-                            <i class="fas fa-envelope mr-1"></i> Kontak
-                        </a>
-                        <?php if (isAdmin()): ?>
-                            <div class="flex items-center space-x-3">
-                                <span class="text-white text-sm">
-                                    <i class="fas fa-user-circle mr-1"></i>
-                                    <?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?>
-                                </span>
-                                <a href="/sistem/admin/index.php"
-                                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium">
-                                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
-                                </a>
-                            </div>
-                        <?php else: ?>
-                            <?php if (!isset($_SESSION['user_id'])): ?>
-                                <!-- Jika belum login -->
-                                <a href="/sistem/admin/auth/login.php"
-                                    class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
-                                    <i class="fas fa-sign-in-alt mr-1"></i> Login Admin
-                                </a>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Improved Mobile Menu Button -->
-                <div class="md:hidden">
-                    <button @click="open = !open" class="text-white hover:bg-blue-700 p-2 rounded-md transition-colors duration-300">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Enhanced Mobile Menu with Smooth Transitions -->
-        <div x-show="open"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 transform -translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform -translate-y-2"
-            class="md:hidden bg-blue-800">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="/sistem/public/index.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
-                    <i class="fas fa-home mr-1"></i> Beranda
-                </a>
-                <a href="/sistem/public/books.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
-                    <i class="fas fa-book mr-1"></i> Buku
-                </a>
-                <a href="/sistem/public/contact.php" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 transition-colors duration-300">
-                    <i class="fas fa-envelope mr-1"></i> Kontak
-                </a>
-            </div>
-        </div>
-    </nav>
+    <?php include $_SERVER['DOCUMENT_ROOT'] . '/sistem/admin/includes/navigation.php'; ?>
+    <!-- Rest of your content -->
 
     <!-- Main Content with Enhanced Layout -->
     <main class="flex-grow container mx-auto px-4 py-8">
