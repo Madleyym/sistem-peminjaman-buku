@@ -13,8 +13,10 @@ if (!defined('SITE_NAME')) {
     define('BOOK_COVERS_URL', BASE_URL . '/uploads/book_covers');
     define('BOOK_UPLOAD_PATH', UPLOAD_PATH . '/books');
     define('USER_UPLOAD_PATH', UPLOAD_PATH . '/users');
+    // Di config/constants.php
+    define('ENVIRONMENT', 'development');
 
-    // ...existing code...
+  
 }
 
 // Database Configuration
