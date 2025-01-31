@@ -171,153 +171,182 @@ $admins = $userManager->getAllAdmins();
         </div>
     </nav>
 
-    <!-- Main Content with Enhanced Layout -->
-    <!-- Main Content with Enhanced Layout -->
     <main class="flex-grow container mx-auto px-4 py-8">
-        <!-- Dashboard Header -->
+        <!-- Header Dashboard -->
         <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-            <div class="flex items-center justify-between">
-                <h2 class="text-3xl font-bold text-blue-700 flex items-center">
-                    <i class="fas fa-users mr-3"></i>
-                    Manajemen Pengguna
-                </h2>
-                <!-- Breadcrumb -->
-                <nav class="hidden sm:flex">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <!-- Title and Action Button -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <h2 class="text-3xl font-bold text-blue-700 flex items-center whitespace-nowrap">
+                        <i class="fas fa-users mr-3"></i>
+                        Manajemen Pengguna
+                    </h2>
+                    <!-- Staff Registration Button -->
+                    <a href="/sistem/petugas/auth/register.php"
+                        class="inline-flex items-center px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-300 shadow hover:shadow-lg">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Tambah Petugas Baru
+                    </a>
+                </div>
+
+                <!-- Breadcrumb Navigation -->
+                <nav class="hidden sm:flex items-center">
                     <ol class="flex items-center space-x-2 text-gray-500 text-sm">
-                        <li><a href="/sistem/admin/index.php" class="hover:text-blue-600">Dashboard</a></li>
-                        <li><i class="fas fa-chevron-right text-xs"></i></li>
-                        <li class="text-blue-600">Manajemen Pengguna</li>
+                        <li><a href="/sistem/admin/index.php" class="hover:text-blue-600 transition-colors duration-200">Dashboard</a></li>
+                        <li><i class="fas fa-chevron-right text-xs mx-2"></i></li>
+                        <li class="text-blue-600 font-medium">Manajemen Pengguna</li>
                     </ol>
                 </nav>
             </div>
         </div>
 
-        <!-- Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
             <!-- Form Section -->
-            <!-- Form Section -->
-            <div class="lg:col-span-4">
-                <form method="POST" action="" class="bg-white rounded-2xl shadow-lg p-6 transform hover:shadow-xl transition-all duration-300">
+            <div class="xl:col-span-4 space-y-6">
+                <div class="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
                     <h3 class="text-xl font-bold text-blue-700 mb-6 flex items-center">
                         <i class="fas fa-user-plus mr-2"></i>
                         Tambah Admin Baru
                     </h3>
 
+                    <!-- Alert Messages -->
                     <?php if (isset($_SESSION['error'])): ?>
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                            <?= htmlspecialchars($_SESSION['error']) ?>
-                            <?php unset($_SESSION['error']); ?>
+                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <?= htmlspecialchars($_SESSION['error']) ?>
+                            </div>
                         </div>
+                        <?php unset($_SESSION['error']); ?>
                     <?php endif; ?>
 
                     <?php if (isset($_SESSION['success'])): ?>
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                            <?= htmlspecialchars($_SESSION['success']) ?>
-                            <?php unset($_SESSION['success']); ?>
+                        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <?= htmlspecialchars($_SESSION['success']) ?>
+                            </div>
                         </div>
+                        <?php unset($_SESSION['success']); ?>
                     <?php endif; ?>
 
-                    <div class="space-y-6">
-                        <div class="relative">
+                    <!-- Registration Form -->
+                    <form method="POST" action="" class="space-y-6">
+                        <!-- Username Field -->
+                        <div class="form-group">
                             <label class="block text-gray-700 text-sm font-semibold mb-2">
                                 <i class="fas fa-user mr-2"></i>Username
                             </label>
-                            <input type="text" name="username" required placeholder="Masukkan username"
-                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                            <input type="text" name="username" required
+                                placeholder="Masukkan username"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200">
                         </div>
 
-                        <div class="relative">
+                        <!-- NIK Field -->
+                        <div class="form-group">
                             <label class="block text-gray-700 text-sm font-semibold mb-2">
                                 <i class="fas fa-id-card mr-2"></i>NIK
                             </label>
-                            <input type="text" name="nik" required placeholder="Masukkan NIK 16 digit"
+                            <input type="text" name="nik" required
+                                placeholder="Masukkan NIK 16 digit"
                                 pattern="\d{16}" maxlength="16"
-                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200">
                         </div>
 
-                        <div class="relative">
+                        <!-- Full Name Field -->
+                        <div class="form-group">
                             <label class="block text-gray-700 text-sm font-semibold mb-2">
                                 <i class="fas fa-user mr-2"></i>Nama Lengkap
                             </label>
-                            <input type="text" name="name" required placeholder="Masukkan nama lengkap"
-                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                            <input type="text" name="name" required
+                                placeholder="Masukkan nama lengkap"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200">
                         </div>
 
-                        <div class="relative">
+                        <!-- Email Field -->
+                        <div class="form-group">
                             <label class="block text-gray-700 text-sm font-semibold mb-2">
                                 <i class="fas fa-envelope mr-2"></i>Email
                             </label>
-                            <input type="email" name="email" required placeholder="contoh@email.com"
-                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                            <input type="email" name="email" required
+                                placeholder="contoh@email.com"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200">
                         </div>
 
-                        <div class="relative">
+                        <!-- Password Field -->
+                        <div class="form-group">
                             <label class="block text-gray-700 text-sm font-semibold mb-2">
                                 <i class="fas fa-lock mr-2"></i>Password
                             </label>
-                            <input type="password" name="password" required placeholder="Minimal 8 karakter"
-                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                            <input type="password" name="password" required
+                                placeholder="Minimal 8 karakter"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200">
                         </div>
 
+                        <!-- Submit Button -->
                         <button type="submit" name="create"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center shadow hover:shadow-lg">
                             <i class="fas fa-plus-circle mr-2"></i>
                             Tambah Admin
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
 
             <!-- Table Section -->
-            <div class="lg:col-span-8">
+            <div class="xl:col-span-8">
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-                    <!-- Table Header -->
+                    <!-- Table Header with Search -->
                     <div class="p-6 border-b border-gray-100">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <h3 class="text-xl font-bold text-blue-700 flex items-center">
                                 <i class="fas fa-list mr-2"></i>
                                 Daftar Admin
                             </h3>
-                            <div class="flex items-center space-x-3">
+                            <!-- Search Box -->
+                            <div class="w-full sm:w-auto">
                                 <div class="relative">
-                                    <input type="text" placeholder="Cari admin..."
-                                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent">
-                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                    <input type="text"
+                                        placeholder="Cari admin..."
+                                        class="w-full sm:w-64 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200">
+                                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Table Content -->
-                    <!-- Table Content -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIK</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIK</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <?php foreach ($admins as $admin): ?>
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4"><?= htmlspecialchars($admin['username']) ?></td>
-                                        <td class="px-6 py-4"><?= htmlspecialchars($admin['name']) ?></td>
-                                        <td class="px-6 py-4"><?= htmlspecialchars($admin['email']) ?></td>
-                                        <td class="px-6 py-4"><?= htmlspecialchars($admin['nik']) ?></td>
-                                        <td class="px-6 py-4 text-right">
+                                    <tr class="hover:bg-gray-50 transition duration-150">
+                                        <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($admin['username']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($admin['name']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($admin['email']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($admin['nik']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right">
                                             <div class="flex justify-end space-x-2">
-                                                <button class="group bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg">
+                                                <!-- Edit Button -->
+                                                <button class="group bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition duration-200 shadow hover:shadow-md">
                                                     <i class="fas fa-edit"></i>
                                                     <span class="hidden group-hover:inline ml-1">Edit</span>
                                                 </button>
+                                                <!-- Delete Button -->
                                                 <form method="POST" action="" class="inline">
                                                     <input type="hidden" name="id" value="<?= $admin['id'] ?>">
                                                     <button type="submit" name="delete"
-                                                        class="group bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg"
+                                                        class="group bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition duration-200 shadow hover:shadow-md"
                                                         onclick="return confirm('Yakin ingin menghapus admin ini?')">
                                                         <i class="fas fa-trash"></i>
                                                         <span class="hidden group-hover:inline ml-1">Hapus</span>
@@ -338,10 +367,10 @@ $admins = $userManager->getAllAdmins();
                                 Menampilkan <span class="font-medium">1</span> sampai <span class="font-medium">10</span> dari <span class="font-medium">20</span> data
                             </div>
                             <div class="flex space-x-2">
-                                <button class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                                <button class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                                     <i class="fas fa-chevron-left"></i>
                                 </button>
-                                <button class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                                <button class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                                     <i class="fas fa-chevron-right"></i>
                                 </button>
                             </div>
@@ -349,7 +378,6 @@ $admins = $userManager->getAllAdmins();
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 </body>
