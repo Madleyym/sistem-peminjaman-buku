@@ -25,10 +25,10 @@ $database = new Database();
 $conn = $database->getConnection();
 $bookManager = new Book($conn);
 
-$categories = $bookManager->getCategory();
+// $categories = $bookManager->getCategory();
 
 // Debug output
-$categories = $bookManager->getCategory();
+// $categories = $bookManager->getCategory();
 error_log("Found categories: " . print_r($categories, true));
 
 // Pagination dan Filter
