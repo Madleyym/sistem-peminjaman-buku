@@ -4,15 +4,11 @@ session_start();
 require_once '../../config/constants.php';
 require_once '../../config/database.php';
 require_once '../../classes/User.php';
-// require_once __DIR__ . '/../../vendor/autoload.php';
 
-// Default redirect URL
-$redirect_url = '/sistem/public/auth/users/home.php';
-
-// Check if there's a stored redirect URL from a previous session
-if (isset($_SESSION['redirect_after_login'])) {
-    $redirect_url = $_SESSION['redirect_after_login'];
-    unset($_SESSION['redirect_after_login']); // Clear the stored URL
+// Cek jika sudah login, redirect sesuai role
+if (isset($_SESSION['role'])) {
+    header("Location: " . User::getRedirectPath($_SESSION['role']));
+    exit();
 }
 
 // Inisialisasi variabel
@@ -49,19 +45,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Lakukan proses login
         $result = $user->login($email, $password);
 
-        // Jika login berhasil, mulai session
+        // Jika login berhasil
         if ($result['status']) {
+            // Set session
             $_SESSION['user_id'] = $result['user']['id'];
-            $_SESSION['user_name'] = $result['user']['name'];
+            $_SESSION['user_name'] = $result['user']['name'] ?? $result['user']['username'];
             $_SESSION['user_email'] = $result['user']['email'];
+            $_SESSION['role'] = $result['role']; // Menggunakan role dari hasil login
 
-            // Redirect to the stored or default URL
-            header("Location: " . $redirect_url);
+            // Regenerate session ID untuk keamanan
+            session_regenerate_id(true);
+
+            // Redirect menggunakan helper method
+            header("Location: " . User::getRedirectPath($_SESSION['role']));
             exit();
         }
     }
 }
 ?>
+<!-- HTML tetap sama seperti sebelumnya -->
 <!DOCTYPE html>
 <html lang="id">
 
