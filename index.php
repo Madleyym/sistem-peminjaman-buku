@@ -41,12 +41,10 @@ try {
     // Initialize $newBooks to an empty array to avoid undefined variable errors in the HTML section
     $newBooks = [];
 }
-// require_once __DIR__ . '/includes/header.php';
-
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($pageTitle) ?></title>
