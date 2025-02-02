@@ -1,0 +1,9 @@
+# C:\xampp\htdocs\sistem\.htaccess
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /sistem/
+    
+    # Allow direct file access
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+</IfModule>
