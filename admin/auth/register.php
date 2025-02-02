@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Registrasi Admin - <?= htmlspecialchars(SITE_NAME) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/sistem/admin/auth/auth-styles.css">
+    <link rel="stylesheet" href="/sistem/admin/auth/css/auth-styles.css">
 </head>
 
 <body class="bg-gray-50 font-inter min-h-screen flex items-center justify-center">
