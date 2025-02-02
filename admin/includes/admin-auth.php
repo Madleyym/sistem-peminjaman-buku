@@ -7,7 +7,7 @@ function checkAdminAuth() {
     
     // Check if user is logged in and is an admin
     if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-        header("Location: /sistem/admin/auth/login.php");
+        header("Location: /sistem/admin/auth/admin-login.php");
         exit();
     }
 }
